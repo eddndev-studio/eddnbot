@@ -2,11 +2,11 @@ import type { FastifyInstance } from "fastify";
 import { sql } from "drizzle-orm";
 
 export async function healthRoutes(app: FastifyInstance) {
-  app.get("/health", async () => {
+  app.get("/health", { config: { skipAuth: true } }, async () => {
     return { status: "ok" };
   });
 
-  app.get("/health/ready", async (_request, reply) => {
+  app.get("/health/ready", { config: { skipAuth: true } }, async (_request, reply) => {
     try {
       await app.db.execute(sql`SELECT 1`);
       return { status: "ready", services: { database: "connected" } };

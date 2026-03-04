@@ -1,4 +1,4 @@
-import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations } from "@eddnbot/db/schema";
+import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, tenantQuotas, usageEvents } from "@eddnbot/db/schema";
 import { generateApiKey } from "../../lib/api-key-utils";
 import { testDb } from "./test-db";
 
@@ -77,4 +77,33 @@ export async function seedConversation(
     })
     .returning();
   return conversation;
+}
+
+export async function seedTenantQuota(
+  tenantId: string,
+  overrides: Partial<typeof tenantQuotas.$inferInsert> = {},
+) {
+  const [quota] = await testDb
+    .insert(tenantQuotas)
+    .values({
+      tenantId,
+      ...overrides,
+    })
+    .returning();
+  return quota;
+}
+
+export async function seedUsageEvent(
+  tenantId: string,
+  overrides: Partial<typeof usageEvents.$inferInsert> = {},
+) {
+  const [event] = await testDb
+    .insert(usageEvents)
+    .values({
+      tenantId,
+      eventType: "api_request",
+      ...overrides,
+    })
+    .returning();
+  return event;
 }

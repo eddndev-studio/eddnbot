@@ -12,6 +12,18 @@
     "lint": {
       "dependsOn": ["^build"]
     },
+    "test": {
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GOOGLE_GEMINI_API_KEY",
+        "WHATSAPP_APP_SECRET",
+        "WHATSAPP_VERIFY_TOKEN",
+        "WHATSAPP_API_VERSION"
+      ]
+    },
     "db:generate": {
       "cache": false,
       "passThroughEnv": ["DATABASE_URL"]

@@ -1,0 +1,18 @@
+{
+  "name": "@eddnbot/whatsapp",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./webhook": "./src/webhook.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@eddnbot/config-ts": "workspace:*",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
+  }
+}

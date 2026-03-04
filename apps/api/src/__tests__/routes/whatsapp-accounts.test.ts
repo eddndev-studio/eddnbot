@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildTestApp } from "../helpers/build-test-app";
-import { seedTenant, seedApiKey, seedWhatsAppAccount } from "../helpers/seed";
+import { seedTenant, seedApiKey, seedWhatsAppAccount, seedAiConfig } from "../helpers/seed";
 
 let app: FastifyInstance;
 
@@ -86,6 +86,51 @@ describe("POST /whatsapp/accounts", () => {
     });
 
     expect(response.statusCode).toBe(401);
+  });
+
+  it("creates account with aiConfigId", async () => {
+    const tenant = await seedTenant();
+    const { rawKey } = await seedApiKey(tenant.id);
+    const config = await seedAiConfig(tenant.id);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/whatsapp/accounts",
+      headers: { "x-api-key": rawKey },
+      payload: {
+        phoneNumberId: `ai-cfg-${Date.now()}`,
+        wabaId: "waba-ai",
+        accessToken: "token",
+        aiConfigId: config.id,
+        autoReplyEnabled: true,
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    const body = response.json();
+    expect(body.aiConfigId).toBe(config.id);
+    expect(body.autoReplyEnabled).toBe(true);
+  });
+
+  it("returns 422 when aiConfigId belongs to another tenant", async () => {
+    const t1 = await seedTenant({ slug: `t1-cfg-${Date.now()}` });
+    const t2 = await seedTenant({ slug: `t2-cfg-${Date.now()}` });
+    const { rawKey } = await seedApiKey(t1.id);
+    const otherConfig = await seedAiConfig(t2.id);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/whatsapp/accounts",
+      headers: { "x-api-key": rawKey },
+      payload: {
+        phoneNumberId: `cross-cfg-${Date.now()}`,
+        wabaId: "waba-cross",
+        accessToken: "token",
+        aiConfigId: otherConfig.id,
+      },
+    });
+
+    expect(response.statusCode).toBe(422);
   });
 });
 
@@ -195,6 +240,28 @@ describe("PATCH /whatsapp/accounts/:accountId", () => {
     });
 
     expect(response.statusCode).toBe(404);
+  });
+
+  it("updates aiConfigId and autoReplyEnabled", async () => {
+    const tenant = await seedTenant();
+    const { rawKey } = await seedApiKey(tenant.id);
+    const account = await seedWhatsAppAccount(tenant.id);
+    const config = await seedAiConfig(tenant.id);
+
+    const response = await app.inject({
+      method: "PATCH",
+      url: `/whatsapp/accounts/${account.id}`,
+      headers: { "x-api-key": rawKey },
+      payload: {
+        aiConfigId: config.id,
+        autoReplyEnabled: true,
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.aiConfigId).toBe(config.id);
+    expect(body.autoReplyEnabled).toBe(true);
   });
 });
 

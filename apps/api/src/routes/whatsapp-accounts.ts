@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
-import { whatsappAccounts } from "@eddnbot/db/schema";
+import { whatsappAccounts, aiConfigs } from "@eddnbot/db/schema";
 
 const createSchema = z.object({
   phoneNumberId: z.string().min(1).max(50),
@@ -9,6 +9,8 @@ const createSchema = z.object({
   accessToken: z.string().min(1),
   displayPhoneNumber: z.string().max(30).optional(),
   webhookVerifyToken: z.string().max(255).optional(),
+  aiConfigId: z.string().uuid().nullable().optional(),
+  autoReplyEnabled: z.boolean().optional(),
 });
 
 const updateSchema = z.object({
@@ -16,12 +18,25 @@ const updateSchema = z.object({
   accessToken: z.string().min(1).optional(),
   webhookVerifyToken: z.string().max(255).nullable().optional(),
   isActive: z.boolean().optional(),
+  aiConfigId: z.string().uuid().nullable().optional(),
+  autoReplyEnabled: z.boolean().optional(),
 });
 
 export async function whatsappAccountRoutes(app: FastifyInstance) {
   // POST /whatsapp/accounts
   app.post("/whatsapp/accounts", async (request, reply) => {
     const body = createSchema.parse(request.body);
+
+    // Validate aiConfigId belongs to the same tenant
+    if (body.aiConfigId) {
+      const [cfg] = await app.db
+        .select({ id: aiConfigs.id })
+        .from(aiConfigs)
+        .where(and(eq(aiConfigs.id, body.aiConfigId), eq(aiConfigs.tenantId, request.tenant.id)));
+      if (!cfg) {
+        return reply.code(422).send({ error: "AI config not found or belongs to another tenant" });
+      }
+    }
 
     try {
       const [account] = await app.db
@@ -33,6 +48,8 @@ export async function whatsappAccountRoutes(app: FastifyInstance) {
           accessToken: body.accessToken,
           displayPhoneNumber: body.displayPhoneNumber,
           webhookVerifyToken: body.webhookVerifyToken,
+          aiConfigId: body.aiConfigId ?? undefined,
+          autoReplyEnabled: body.autoReplyEnabled,
         })
         .returning();
 
@@ -80,6 +97,17 @@ export async function whatsappAccountRoutes(app: FastifyInstance) {
   app.patch("/whatsapp/accounts/:accountId", async (request, reply) => {
     const { accountId } = request.params as { accountId: string };
     const body = updateSchema.parse(request.body);
+
+    // Validate aiConfigId belongs to the same tenant
+    if (body.aiConfigId) {
+      const [cfg] = await app.db
+        .select({ id: aiConfigs.id })
+        .from(aiConfigs)
+        .where(and(eq(aiConfigs.id, body.aiConfigId), eq(aiConfigs.tenantId, request.tenant.id)));
+      if (!cfg) {
+        return reply.code(422).send({ error: "AI config not found or belongs to another tenant" });
+      }
+    }
 
     const updates: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(body)) {

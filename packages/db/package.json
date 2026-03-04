@@ -10,7 +10,8 @@
   "scripts": {
     "db:generate": "dotenv -e ../../.env -- drizzle-kit generate",
     "db:migrate": "dotenv -e ../../.env -- drizzle-kit migrate",
-    "db:studio": "dotenv -e ../../.env -- drizzle-kit studio"
+    "db:studio": "dotenv -e ../../.env -- drizzle-kit studio",
+    "test": "vitest run"
   },
   "dependencies": {
     "drizzle-orm": "^0.39.3",
@@ -20,6 +21,7 @@
     "@eddnbot/config-ts": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.30.4",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
   }
 }

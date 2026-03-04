@@ -4,6 +4,8 @@ import type {
   WhatsAppAdapter,
   OutboundMessage,
   SendMessageResponse,
+  MediaUrlResponse,
+  MediaDownloadResult,
 } from "./types";
 
 const DEFAULT_API_VERSION = "v21.0";
@@ -62,6 +64,43 @@ export function createWhatsAppClient(
         status: "read",
         message_id: messageId,
       });
+    },
+
+    async getMediaUrl(mediaId: string): Promise<MediaUrlResponse> {
+      const url = `https://graph.facebook.com/${version}/${mediaId}`;
+      const response = await fetchFn(url, { method: "GET", headers });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const err = (data as { error?: { message?: string; code?: number } }).error;
+        throw new WhatsAppApiError(
+          err?.message ?? "WhatsApp API error",
+          response.status,
+          err?.code,
+        );
+      }
+
+      return data as MediaUrlResponse;
+    },
+
+    async downloadMedia(url: string): Promise<MediaDownloadResult> {
+      const response = await fetchFn(url, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${config.accessToken}` },
+      });
+
+      if (!response.ok) {
+        throw new WhatsAppApiError(
+          "Failed to download media",
+          response.status,
+        );
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const mimeType = response.headers.get("content-type") ?? "application/octet-stream";
+
+      return { buffer, mimeType };
     },
   };
 }

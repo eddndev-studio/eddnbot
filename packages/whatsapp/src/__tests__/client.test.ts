@@ -135,6 +135,110 @@ describe("sendMessage", () => {
   });
 });
 
+describe("getMediaUrl", () => {
+  it("returns media URL for valid media ID", async () => {
+    const mediaResponse = {
+      url: "https://lookaside.fbsbx.com/whatsapp_business/attachments/...",
+      mime_type: "audio/ogg",
+      sha256: "abc123",
+      file_size: 12345,
+      id: "media-id-123",
+    };
+    const fetchFn = mockFetch(200, mediaResponse);
+    const client = createWhatsAppClient(config, fetchFn);
+
+    const result = await client.getMediaUrl("media-id-123");
+
+    expect(result.url).toBe(mediaResponse.url);
+    expect(result.mime_type).toBe("audio/ogg");
+    expect(result.id).toBe("media-id-123");
+  });
+
+  it("throws WhatsAppApiError on failure", async () => {
+    const fetchFn = mockFetch(404, {
+      error: { message: "Media not found", code: 100 },
+    });
+    const client = createWhatsAppClient(config, fetchFn);
+
+    await expect(client.getMediaUrl("bad-id")).rejects.toThrow(WhatsAppApiError);
+  });
+
+  it("uses correct Graph API URL with version", async () => {
+    const fetchFn = mockFetch(200, {
+      url: "https://example.com",
+      mime_type: "audio/ogg",
+      sha256: "abc",
+      file_size: 100,
+      id: "mid-1",
+    });
+    const client = createWhatsAppClient({ ...config, apiVersion: "v22.0" }, fetchFn);
+
+    await client.getMediaUrl("mid-1");
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      "https://graph.facebook.com/v22.0/mid-1",
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
+});
+
+describe("downloadMedia", () => {
+  it("downloads binary and returns Buffer + mimeType", async () => {
+    const binaryData = new Uint8Array([0x00, 0x01, 0x02, 0x03]);
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => binaryData.buffer,
+      headers: new Map([["content-type", "audio/ogg; codecs=opus"]]),
+    });
+    // Mock headers.get
+    (fetchFn as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => binaryData.buffer,
+      headers: { get: (name: string) => name === "content-type" ? "audio/ogg; codecs=opus" : null },
+    });
+    const client = createWhatsAppClient(config, fetchFn);
+
+    const result = await client.downloadMedia("https://lookaside.fbsbx.com/media");
+
+    expect(Buffer.isBuffer(result.buffer)).toBe(true);
+    expect(result.buffer).toHaveLength(4);
+    expect(result.mimeType).toBe("audio/ogg; codecs=opus");
+  });
+
+  it("throws WhatsAppApiError on failure", async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+    });
+    const client = createWhatsAppClient(config, fetchFn);
+
+    await expect(
+      client.downloadMedia("https://example.com/media"),
+    ).rejects.toThrow(WhatsAppApiError);
+  });
+
+  it("sends Authorization header", async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => new ArrayBuffer(0),
+      headers: { get: () => "application/octet-stream" },
+    });
+    const client = createWhatsAppClient(config, fetchFn);
+
+    await client.downloadMedia("https://lookaside.fbsbx.com/media");
+
+    expect(fetchFn).toHaveBeenCalledWith(
+      "https://lookaside.fbsbx.com/media",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer test-access-token" },
+      }),
+    );
+  });
+});
+
 describe("markAsRead", () => {
   it("sends read status for a message", async () => {
     const fetchFn = mockFetch(200, { success: true });

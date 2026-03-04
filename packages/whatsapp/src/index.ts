@@ -4,6 +4,8 @@ export { WhatsAppError, WhatsAppApiError, WebhookVerificationError } from "./err
 export type {
   WhatsAppClientConfig,
   WhatsAppAdapter,
+  MediaUrlResponse,
+  MediaDownloadResult,
   OutboundMessage,
   TextMessage,
   ImageMessage,

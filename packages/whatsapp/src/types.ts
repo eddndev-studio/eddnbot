@@ -6,11 +6,28 @@ export interface WhatsAppClientConfig {
   apiVersion?: string; // default "v21.0"
 }
 
+// ── Media Types ──
+
+export interface MediaUrlResponse {
+  url: string;
+  mime_type: string;
+  sha256: string;
+  file_size: number;
+  id: string;
+}
+
+export interface MediaDownloadResult {
+  buffer: Buffer;
+  mimeType: string;
+}
+
 // ── Adapter ──
 
 export interface WhatsAppAdapter {
   sendMessage(message: OutboundMessage): Promise<SendMessageResponse>;
   markAsRead(messageId: string): Promise<void>;
+  getMediaUrl(mediaId: string): Promise<MediaUrlResponse>;
+  downloadMedia(url: string): Promise<MediaDownloadResult>;
 }
 
 // ── Outbound Messages ──

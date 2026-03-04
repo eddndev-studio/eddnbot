@@ -3,7 +3,7 @@ import type { Env } from "../../env";
 
 const testEnv: Env = {
   DATABASE_URL: "postgresql://eddnbot:eddnbot@localhost:5432/eddnbot_test",
-  REDIS_URL: "redis://localhost:6379",
+  REDIS_URL: "redis://localhost:6379/1",
   PORT: 0,
   HOST: "127.0.0.1",
   NODE_ENV: "test",

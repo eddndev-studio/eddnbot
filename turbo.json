@@ -13,9 +13,11 @@
       "dependsOn": ["^build"]
     },
     "test": {
+      "dependsOn": ["^test"],
       "cache": false,
       "passThroughEnv": [
         "DATABASE_URL",
+        "REDIS_URL",
         "OPENAI_API_KEY",
         "ANTHROPIC_API_KEY",
         "GOOGLE_GEMINI_API_KEY",

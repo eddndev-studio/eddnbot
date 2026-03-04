@@ -1,0 +1,15 @@
+{
+  "name": "@eddnbot/config-lint",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint.config.js",
+    "./prettier": "./prettier.config.js"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.21.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-drizzle": "^0.2.3",
+    "typescript-eslint": "^8.26.0"
+  }
+}

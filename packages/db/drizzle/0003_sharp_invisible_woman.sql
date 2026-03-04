@@ -1,0 +1,3 @@
+ALTER TABLE "whatsapp_accounts" ADD COLUMN "ai_config_id" uuid;--> statement-breakpoint
+ALTER TABLE "whatsapp_accounts" ADD COLUMN "auto_reply_enabled" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "whatsapp_accounts" ADD CONSTRAINT "whatsapp_accounts_ai_config_id_ai_configs_id_fk" FOREIGN KEY ("ai_config_id") REFERENCES "public"."ai_configs"("id") ON DELETE set null ON UPDATE no action;

@@ -9,6 +9,8 @@ import {
   whatsappAccounts,
   conversations,
   messages,
+  usageEvents,
+  tenantQuotas,
 } from "../schema/index";
 
 describe("tenants", () => {
@@ -269,6 +271,83 @@ describe("whatsappAccounts", () => {
       .where(eq(whatsappAccounts.tenantId, tenant.id));
     expect(remaining).toHaveLength(0);
   });
+
+  it("inserts with aiConfigId null by default", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    const [account] = await testDb
+      .insert(whatsappAccounts)
+      .values({
+        tenantId: tenant.id,
+        phoneNumberId: "null-cfg-phone",
+        wabaId: "waba-001",
+        accessToken: "token",
+      })
+      .returning();
+
+    expect(account.aiConfigId).toBeNull();
+    expect(account.autoReplyEnabled).toBe(false);
+  });
+
+  it("inserts with a valid aiConfigId FK", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+    const [config] = await testDb
+      .insert(aiConfigs)
+      .values({ tenantId: tenant.id, provider: "openai", model: "gpt-4o" })
+      .returning();
+
+    const [account] = await testDb
+      .insert(whatsappAccounts)
+      .values({
+        tenantId: tenant.id,
+        phoneNumberId: "fk-phone",
+        wabaId: "waba-001",
+        accessToken: "token",
+        aiConfigId: config.id,
+        autoReplyEnabled: true,
+      })
+      .returning();
+
+    expect(account.aiConfigId).toBe(config.id);
+    expect(account.autoReplyEnabled).toBe(true);
+  });
+
+  it("sets aiConfigId to null on ai_config delete (SET NULL)", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+    const [config] = await testDb
+      .insert(aiConfigs)
+      .values({ tenantId: tenant.id, provider: "openai", model: "gpt-4o" })
+      .returning();
+    const [account] = await testDb
+      .insert(whatsappAccounts)
+      .values({
+        tenantId: tenant.id,
+        phoneNumberId: "set-null-phone",
+        wabaId: "waba-001",
+        accessToken: "token",
+        aiConfigId: config.id,
+      })
+      .returning();
+
+    // Delete the ai config
+    await testDb.delete(aiConfigs).where(eq(aiConfigs.id, config.id));
+
+    const [updated] = await testDb
+      .select()
+      .from(whatsappAccounts)
+      .where(eq(whatsappAccounts.id, account.id));
+
+    expect(updated.aiConfigId).toBeNull();
+  });
 });
 
 describe("conversations", () => {
@@ -372,5 +451,135 @@ describe("messages", () => {
     expect(msg.content).toEqual({ text: { body: "Hello!" } });
     expect(msg.status).toBe("received");
     expect(msg.createdAt).toBeInstanceOf(Date);
+  });
+});
+
+describe("usageEvents", () => {
+  it("inserts and queries a usage event", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    const [event] = await testDb
+      .insert(usageEvents)
+      .values({
+        tenantId: tenant.id,
+        eventType: "ai_tokens",
+        provider: "openai",
+        model: "gpt-4o",
+        inputTokens: 100,
+        outputTokens: 200,
+      })
+      .returning();
+
+    expect(event.id).toBeDefined();
+    expect(event.tenantId).toBe(tenant.id);
+    expect(event.eventType).toBe("ai_tokens");
+    expect(event.provider).toBe("openai");
+    expect(event.model).toBe("gpt-4o");
+    expect(event.inputTokens).toBe(100);
+    expect(event.outputTokens).toBe(200);
+    expect(event.metadata).toEqual({});
+    expect(event.createdAt).toBeInstanceOf(Date);
+  });
+
+  it("cascade deletes when tenant is deleted", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    await testDb.insert(usageEvents).values({
+      tenantId: tenant.id,
+      eventType: "api_request",
+      endpoint: "/ai/chat",
+      method: "POST",
+      statusCode: 200,
+    });
+
+    await testDb.delete(tenants).where(eq(tenants.id, tenant.id));
+
+    const remaining = await testDb
+      .select()
+      .from(usageEvents)
+      .where(eq(usageEvents.tenantId, tenant.id));
+    expect(remaining).toHaveLength(0);
+  });
+});
+
+describe("tenantQuotas", () => {
+  it("inserts and queries tenant quotas", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    const [quota] = await testDb
+      .insert(tenantQuotas)
+      .values({
+        tenantId: tenant.id,
+        maxAiTokensPerMonth: 100000,
+        maxWhatsappMessagesPerMonth: 1000,
+        maxApiRequestsPerMonth: 50000,
+        maxRequestsPerMinute: 120,
+      })
+      .returning();
+
+    expect(quota.id).toBeDefined();
+    expect(quota.tenantId).toBe(tenant.id);
+    expect(quota.maxAiTokensPerMonth).toBe(100000);
+    expect(quota.maxWhatsappMessagesPerMonth).toBe(1000);
+    expect(quota.maxApiRequestsPerMonth).toBe(50000);
+    expect(quota.maxRequestsPerMinute).toBe(120);
+    expect(quota.createdAt).toBeInstanceOf(Date);
+    expect(quota.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it("enforces unique tenant_id constraint", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    await testDb.insert(tenantQuotas).values({ tenantId: tenant.id });
+
+    await expect(
+      testDb.insert(tenantQuotas).values({ tenantId: tenant.id }),
+    ).rejects.toThrow();
+  });
+
+  it("defaults maxRequestsPerMinute to 60", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    const [quota] = await testDb
+      .insert(tenantQuotas)
+      .values({ tenantId: tenant.id })
+      .returning();
+
+    expect(quota.maxRequestsPerMinute).toBe(60);
+    expect(quota.maxAiTokensPerMonth).toBeNull();
+    expect(quota.maxWhatsappMessagesPerMonth).toBeNull();
+    expect(quota.maxApiRequestsPerMonth).toBeNull();
+  });
+
+  it("cascade deletes when tenant is deleted", async () => {
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    await testDb.insert(tenantQuotas).values({ tenantId: tenant.id });
+
+    await testDb.delete(tenants).where(eq(tenants.id, tenant.id));
+
+    const remaining = await testDb
+      .select()
+      .from(tenantQuotas)
+      .where(eq(tenantQuotas.tenantId, tenant.id));
+    expect(remaining).toHaveLength(0);
   });
 });

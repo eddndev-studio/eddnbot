@@ -8,6 +8,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
+import { aiConfigs } from "./ai-configs";
 
 export const whatsappAccounts = pgTable(
   "whatsapp_accounts",
@@ -21,6 +22,8 @@ export const whatsappAccounts = pgTable(
     displayPhoneNumber: varchar("display_phone_number", { length: 30 }),
     accessToken: text("access_token").notNull(),
     webhookVerifyToken: varchar("webhook_verify_token", { length: 255 }),
+    aiConfigId: uuid("ai_config_id").references(() => aiConfigs.id, { onDelete: "set null" }),
+    autoReplyEnabled: boolean("auto_reply_enabled").notNull().default(false),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

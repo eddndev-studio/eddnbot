@@ -5,3 +5,5 @@ export { aiConfigs } from "./ai-configs";
 export { whatsappAccounts } from "./whatsapp-accounts";
 export { conversations } from "./conversations";
 export { messages } from "./messages";
+export { usageEvents } from "./usage-events";
+export { tenantQuotas } from "./tenant-quotas";

@@ -8,6 +8,9 @@ import { createDb, type Database } from "@eddnbot/db/client";
 import type { Env } from "./env";
 import { registerSensible } from "./plugins/sensible";
 import { authPlugin } from "./plugins/auth";
+import { redisPlugin } from "./plugins/redis";
+import { rateLimitPlugin } from "./plugins/rate-limit";
+import { usageTrackingPlugin } from "./plugins/usage-tracking";
 import { healthRoutes } from "./routes/health";
 import { tenantRoutes } from "./routes/tenants";
 import { apiKeyRoutes } from "./routes/api-keys";
@@ -17,11 +20,14 @@ import { aiTranscribeRoutes } from "./routes/ai-transcribe";
 import { whatsappAccountRoutes } from "./routes/whatsapp-accounts";
 import { whatsappWebhookRoutes } from "./routes/whatsapp-webhook";
 import { whatsappSendRoutes } from "./routes/whatsapp-send";
+import { tenantQuotaRoutes } from "./routes/tenant-quotas";
+import { usageRoutes } from "./routes/usage";
 
 declare module "fastify" {
   interface FastifyInstance {
     db: Database;
     env: Env;
+    pendingAutoReplies: Promise<void>[];
   }
 }
 
@@ -37,6 +43,7 @@ export async function buildApp(env: Env) {
   app.decorate("env", env);
   const db = createDb(env.DATABASE_URL);
   app.decorate("db", db);
+  app.decorate("pendingAutoReplies", [] as Promise<void>[]);
 
   // Error handler
   app.setErrorHandler(async (error, _request, reply) => {
@@ -55,7 +62,10 @@ export async function buildApp(env: Env) {
   await app.register(helmet);
   await app.register(multipart, { limits: { fileSize: 26 * 1024 * 1024 } });
   await app.register(rawBody, { runFirst: true });
+  await app.register(redisPlugin);
   await app.register(authPlugin);
+  await app.register(rateLimitPlugin);
+  await app.register(usageTrackingPlugin);
 
   // Routes
   await app.register(healthRoutes);
@@ -67,6 +77,8 @@ export async function buildApp(env: Env) {
   await app.register(whatsappWebhookRoutes);
   await app.register(whatsappAccountRoutes);
   await app.register(whatsappSendRoutes);
+  await app.register(tenantQuotaRoutes);
+  await app.register(usageRoutes);
 
   return app;
 }

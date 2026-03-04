@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { aiConfigs } from "@eddnbot/db/schema";
 import { createAiEngine } from "@eddnbot/ai";
 import type { AiProvider, AiEngineConfig, ThinkingConfig } from "@eddnbot/ai";
+import { checkQuota, trackAiTokens } from "../services/usage-tracker";
 
 const chatSchema = z.object({
   messages: z
@@ -75,8 +76,26 @@ export async function aiChatRoutes(app: FastifyInstance) {
         : undefined,
     };
 
+    // Check AI token quota
+    const quotaCheck = await checkQuota(app.db, app.redis, request.tenant.id, "ai_tokens");
+    if (!quotaCheck.allowed) {
+      return reply.code(429).send({
+        error: `Monthly ai_tokens quota exceeded (${quotaCheck.current}/${quotaCheck.limit})`,
+      });
+    }
+
     const engine = createAiEngine({ provider });
     const result = await engine.chat(body.messages, engineConfig);
+
+    // Track AI token usage
+    if (result.usage) {
+      await trackAiTokens(app.db, app.redis, request.tenant.id, {
+        provider,
+        model: config.model,
+        inputTokens: result.usage.inputTokens ?? 0,
+        outputTokens: result.usage.outputTokens ?? 0,
+      });
+    }
 
     return result;
   });

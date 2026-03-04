@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { whatsappAccounts, conversations, messages } from "@eddnbot/db/schema";
 import { createWhatsAppClient } from "@eddnbot/whatsapp";
 import type { OutboundMessage, TemplateMessage } from "@eddnbot/whatsapp";
+import { checkQuota, trackWhatsAppMessage } from "../services/usage-tracker";
 
 const sendSchema = z.object({
   accountId: z.string().uuid(),
@@ -47,6 +48,14 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
 
     if (!account) {
       return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
+    // Check WhatsApp message quota
+    const quotaCheck = await checkQuota(app.db, app.redis, request.tenant.id, "whatsapp_messages");
+    if (!quotaCheck.allowed) {
+      return reply.code(429).send({
+        error: `Monthly whatsapp_messages quota exceeded (${quotaCheck.current}/${quotaCheck.limit})`,
+      });
     }
 
     const client = createWhatsAppClient({
@@ -96,6 +105,9 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
       sentAt: new Date(),
     });
 
+    // Track WhatsApp message
+    await trackWhatsAppMessage(app.db, app.redis, request.tenant.id);
+
     return { waMessageId, conversationId: conv.id };
   });
 
@@ -116,6 +128,14 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
 
     if (!account) {
       return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
+    // Check WhatsApp message quota
+    const quotaCheck = await checkQuota(app.db, app.redis, request.tenant.id, "whatsapp_messages");
+    if (!quotaCheck.allowed) {
+      return reply.code(429).send({
+        error: `Monthly whatsapp_messages quota exceeded (${quotaCheck.current}/${quotaCheck.limit})`,
+      });
     }
 
     const client = createWhatsAppClient({
@@ -156,6 +176,9 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
       status: "sent",
       sentAt: new Date(),
     });
+
+    // Track WhatsApp message
+    await trackWhatsAppMessage(app.db, app.redis, request.tenant.id);
 
     return { waMessageId, conversationId: conv.id };
   });

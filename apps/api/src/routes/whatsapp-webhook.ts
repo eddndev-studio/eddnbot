@@ -1,13 +1,33 @@
 import type { FastifyInstance } from "fastify";
-import { eq } from "drizzle-orm";
-import { whatsappAccounts, conversations, messages } from "@eddnbot/db/schema";
+import { eq, and } from "drizzle-orm";
+import { whatsappAccounts, aiConfigs, conversations, messages } from "@eddnbot/db/schema";
 import {
   verifyWebhookSignature,
   verifyChallenge,
   parseWebhookPayload,
   WebhookVerificationError,
+  createWhatsAppClient,
 } from "@eddnbot/whatsapp";
 import type { WebhookPayload, ParsedWebhookEvent } from "@eddnbot/whatsapp";
+import { createAiEngine, createWhisperAdapter } from "@eddnbot/ai";
+import type { AiProvider, AiEngineConfig, ThinkingConfig } from "@eddnbot/ai";
+import { handleInboundMessage, type ConversationHandlerDeps } from "../services/conversation-handler";
+import { trackAiTokens, trackWhatsAppMessage, checkQuota } from "../services/usage-tracker";
+
+export interface ProcessedInboundMessage {
+  whatsappAccountId: string;
+  conversationId: string;
+  messageType: string;
+  messageContent: Record<string, unknown>;
+  contactPhone: string;
+  waMessageId: string;
+}
+
+const API_KEY_MAP: Record<AiProvider, "OPENAI_API_KEY" | "ANTHROPIC_API_KEY" | "GOOGLE_GEMINI_API_KEY"> = {
+  openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  gemini: "GOOGLE_GEMINI_API_KEY",
+};
 
 export async function whatsappWebhookRoutes(app: FastifyInstance) {
   // GET /whatsapp/webhook — Meta challenge verification
@@ -58,24 +78,40 @@ export async function whatsappWebhookRoutes(app: FastifyInstance) {
       const payload = request.body as WebhookPayload;
       const events = parseWebhookPayload(payload);
 
-      // Process each event in background (return 200 immediately to Meta is fine after processing)
+      // Process each event synchronously (before returning 200)
+      const allProcessed: ProcessedInboundMessage[] = [];
       for (const event of events) {
-        await processEvent(app, event);
+        const processed = await processEvent(app, event);
+        allProcessed.push(...processed);
       }
 
-      return reply.code(200).send({ status: "ok" });
+      // Return 200 immediately to Meta
+      reply.code(200).send({ status: "ok" });
+
+      // Fire-and-forget auto-replies
+      if (allProcessed.length > 0) {
+        const p = processAutoReplies(app, allProcessed).catch((err) => {
+          app.log.error({ err }, "Auto-reply processing failed");
+        });
+        app.pendingAutoReplies.push(p as Promise<void>);
+      }
     },
   );
 }
 
-async function processEvent(app: FastifyInstance, event: ParsedWebhookEvent) {
+async function processEvent(
+  app: FastifyInstance,
+  event: ParsedWebhookEvent,
+): Promise<ProcessedInboundMessage[]> {
+  const processed: ProcessedInboundMessage[] = [];
+
   // Find the whatsapp account for this phone number
   const [account] = await app.db
     .select()
     .from(whatsappAccounts)
     .where(eq(whatsappAccounts.phoneNumberId, event.phoneNumberId));
 
-  if (!account) return; // Unknown phone number, skip
+  if (!account) return processed; // Unknown phone number, skip
 
   // Handle inbound messages
   for (const msg of event.messages) {
@@ -129,6 +165,15 @@ async function processEvent(app: FastifyInstance, event: ParsedWebhookEvent) {
       content,
       status: "received",
     });
+
+    processed.push({
+      whatsappAccountId: account.id,
+      conversationId: conv.id,
+      messageType: msg.type,
+      messageContent: content,
+      contactPhone: msg.from,
+      waMessageId: msg.id,
+    });
   }
 
   // Handle status updates
@@ -145,5 +190,100 @@ async function processEvent(app: FastifyInstance, event: ParsedWebhookEvent) {
       .update(messages)
       .set(updates)
       .where(eq(messages.waMessageId, status.id));
+  }
+
+  return processed;
+}
+
+async function processAutoReplies(
+  app: FastifyInstance,
+  processedMessages: ProcessedInboundMessage[],
+): Promise<void> {
+  for (const msg of processedMessages) {
+    try {
+      // Load whatsapp account with auto-reply settings
+      const [account] = await app.db
+        .select()
+        .from(whatsappAccounts)
+        .where(eq(whatsappAccounts.id, msg.whatsappAccountId));
+
+      if (!account || !account.autoReplyEnabled || !account.aiConfigId) {
+        continue;
+      }
+
+      // Load AI config
+      const [aiConfig] = await app.db
+        .select()
+        .from(aiConfigs)
+        .where(
+          and(eq(aiConfigs.id, account.aiConfigId), eq(aiConfigs.tenantId, account.tenantId)),
+        );
+
+      if (!aiConfig) continue;
+
+      // Resolve provider API key
+      const provider = aiConfig.provider as AiProvider;
+      const envKey = API_KEY_MAP[provider];
+      const apiKey = app.env[envKey];
+      if (!apiKey) {
+        app.log.error({ provider }, "Missing API key for auto-reply provider");
+        continue;
+      }
+
+      // Build AI engine config
+      const engineConfig: AiEngineConfig = {
+        provider,
+        model: aiConfig.model,
+        apiKey,
+        systemPrompt: aiConfig.systemPrompt ?? undefined,
+        temperature: aiConfig.temperature ?? undefined,
+        maxOutputTokens: aiConfig.maxOutputTokens ?? undefined,
+        thinking: aiConfig.thinkingConfig
+          ? (aiConfig.thinkingConfig as unknown as ThinkingConfig)
+          : undefined,
+      };
+
+      // Build WhatsApp client
+      const whatsappClient = createWhatsAppClient({
+        phoneNumberId: account.phoneNumberId,
+        accessToken: account.accessToken,
+        apiVersion: app.env.WHATSAPP_API_VERSION,
+      });
+
+      // Build deps
+      const deps: ConversationHandlerDeps = {
+        db: app.db,
+        whatsappClient,
+        aiEngine: createAiEngine({ provider }),
+        aiEngineConfig: engineConfig,
+        logger: app.log,
+        usageTracker: {
+          trackAiTokens,
+          trackWhatsAppMessage,
+          checkQuota,
+          redis: app.redis,
+        },
+        tenantId: account.tenantId,
+      };
+
+      // Add whisper if audio and OpenAI key available
+      if (msg.messageType === "audio" && app.env.OPENAI_API_KEY) {
+        deps.whisperAdapter = createWhisperAdapter();
+        deps.whisperConfig = {
+          apiKey: app.env.OPENAI_API_KEY,
+          model: "whisper-1",
+        };
+      }
+
+      await handleInboundMessage(deps, {
+        conversationId: msg.conversationId,
+        messageType: msg.messageType,
+        messageContent: msg.messageContent,
+        contactPhone: msg.contactPhone,
+        waMessageId: msg.waMessageId,
+      });
+    } catch (err) {
+      app.log.error({ err, waMessageId: msg.waMessageId }, "Auto-reply failed for message");
+    }
   }
 }

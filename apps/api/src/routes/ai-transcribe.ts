@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { createWhisperAdapter } from "@eddnbot/ai";
 import type { TranscriptionConfig } from "@eddnbot/ai";
+import { checkQuota, trackAiTokens } from "../services/usage-tracker";
 
 const ALLOWED_EXTENSIONS = new Set(["flac", "mp3", "mp4", "m4a", "ogg", "wav", "webm"]);
 const ALLOWED_MODELS = new Set(["whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe"]);
@@ -59,8 +60,24 @@ export async function aiTranscribeRoutes(app: FastifyInstance) {
       ...(responseFormat && { responseFormat }),
     };
 
+    // Check AI token quota
+    const quotaCheck = await checkQuota(app.db, app.redis, request.tenant.id, "ai_tokens");
+    if (!quotaCheck.allowed) {
+      return reply.code(429).send({
+        error: `Monthly ai_tokens quota exceeded (${quotaCheck.current}/${quotaCheck.limit})`,
+      });
+    }
+
     const adapter = createWhisperAdapter();
     const result = await adapter.transcribe(fileBuffer, fileName, config);
+
+    // Track transcription as AI token usage (estimate based on audio duration)
+    await trackAiTokens(app.db, app.redis, request.tenant.id, {
+      provider: "openai",
+      model,
+      inputTokens: 0,
+      outputTokens: result.text?.length ?? 0,
+    });
 
     return result;
   });

@@ -6,6 +6,12 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3001),
   HOST: z.string().default("0.0.0.0"),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  OPENAI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  GOOGLE_GEMINI_API_KEY: z.string().optional(),
+  WHATSAPP_APP_SECRET: z.string().optional(),
+  WHATSAPP_VERIFY_TOKEN: z.string().optional(),
+  WHATSAPP_API_VERSION: z.string().default("v21.0"),
 });
 
 export type Env = z.infer<typeof envSchema>;

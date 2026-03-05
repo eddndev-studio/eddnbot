@@ -12,14 +12,21 @@ import { Route as rootRouteImport } from "./routes/__root"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as AuthIndexRouteImport } from "./routes/_auth/index"
+import { Route as AdminLoginRouteImport } from "./routes/admin/login"
+import { Route as AdminAdminRouteImport } from "./routes/admin/_admin"
 import { Route as AuthUsageRouteImport } from "./routes/_auth/usage"
 import { Route as AuthQuotasRouteImport } from "./routes/_auth/quotas"
+import { Route as AdminAdminIndexRouteImport } from "./routes/admin/_admin/index"
 import { Route as AuthWhatsappAccountsIndexRouteImport } from "./routes/_auth/whatsapp-accounts/index"
 import { Route as AuthAiConfigsIndexRouteImport } from "./routes/_auth/ai-configs/index"
+import { Route as AdminAdminUsageRouteImport } from "./routes/admin/_admin/usage"
 import { Route as AuthWhatsappAccountsNewRouteImport } from "./routes/_auth/whatsapp-accounts/new"
 import { Route as AuthWhatsappAccountsAccountIdRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId"
 import { Route as AuthAiConfigsNewRouteImport } from "./routes/_auth/ai-configs/new"
 import { Route as AuthAiConfigsConfigIdRouteImport } from "./routes/_auth/ai-configs/$configId"
+import { Route as AdminAdminTenantsIndexRouteImport } from "./routes/admin/_admin/tenants/index"
+import { Route as AdminAdminTenantsNewRouteImport } from "./routes/admin/_admin/tenants/new"
+import { Route as AdminAdminTenantsTenantIdRouteImport } from "./routes/admin/_admin/tenants/$tenantId"
 
 const LoginRoute = LoginRouteImport.update({
   id: "/login",
@@ -35,6 +42,16 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   path: "/",
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: "/admin/login",
+  path: "/admin/login",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAdminRoute = AdminAdminRouteImport.update({
+  id: "/admin/_admin",
+  path: "/admin",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthUsageRoute = AuthUsageRouteImport.update({
   id: "/usage",
   path: "/usage",
@@ -44,6 +61,11 @@ const AuthQuotasRoute = AuthQuotasRouteImport.update({
   id: "/quotas",
   path: "/quotas",
   getParentRoute: () => AuthRoute,
+} as any)
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthWhatsappAccountsIndexRoute =
   AuthWhatsappAccountsIndexRouteImport.update({
@@ -55,6 +77,11 @@ const AuthAiConfigsIndexRoute = AuthAiConfigsIndexRouteImport.update({
   id: "/ai-configs/",
   path: "/ai-configs/",
   getParentRoute: () => AuthRoute,
+} as any)
+const AdminAdminUsageRoute = AdminAdminUsageRouteImport.update({
+  id: "/usage",
+  path: "/usage",
+  getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthWhatsappAccountsNewRoute = AuthWhatsappAccountsNewRouteImport.update({
   id: "/whatsapp-accounts/new",
@@ -77,30 +104,59 @@ const AuthAiConfigsConfigIdRoute = AuthAiConfigsConfigIdRouteImport.update({
   path: "/ai-configs/$configId",
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminAdminTenantsIndexRoute = AdminAdminTenantsIndexRouteImport.update({
+  id: "/tenants/",
+  path: "/tenants/",
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminTenantsNewRoute = AdminAdminTenantsNewRouteImport.update({
+  id: "/tenants/new",
+  path: "/tenants/new",
+  getParentRoute: () => AdminAdminRoute,
+} as any)
+const AdminAdminTenantsTenantIdRoute =
+  AdminAdminTenantsTenantIdRouteImport.update({
+    id: "/tenants/$tenantId",
+    path: "/tenants/$tenantId",
+    getParentRoute: () => AdminAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof AuthIndexRoute
   "/login": typeof LoginRoute
   "/quotas": typeof AuthQuotasRoute
   "/usage": typeof AuthUsageRoute
+  "/admin": typeof AdminAdminRouteWithChildren
+  "/admin/login": typeof AdminLoginRoute
   "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/ai-configs/new": typeof AuthAiConfigsNewRoute
   "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
+  "/admin/usage": typeof AdminAdminUsageRoute
   "/ai-configs/": typeof AuthAiConfigsIndexRoute
   "/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
+  "/admin/": typeof AdminAdminIndexRoute
+  "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
+  "/admin/tenants/new": typeof AdminAdminTenantsNewRoute
+  "/admin/tenants/": typeof AdminAdminTenantsIndexRoute
 }
 export interface FileRoutesByTo {
   "/login": typeof LoginRoute
   "/quotas": typeof AuthQuotasRoute
   "/usage": typeof AuthUsageRoute
+  "/admin/login": typeof AdminLoginRoute
   "/": typeof AuthIndexRoute
   "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/ai-configs/new": typeof AuthAiConfigsNewRoute
   "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
+  "/admin/usage": typeof AdminAdminUsageRoute
   "/ai-configs": typeof AuthAiConfigsIndexRoute
   "/whatsapp-accounts": typeof AuthWhatsappAccountsIndexRoute
+  "/admin": typeof AdminAdminIndexRoute
+  "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
+  "/admin/tenants/new": typeof AdminAdminTenantsNewRoute
+  "/admin/tenants": typeof AdminAdminTenantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,13 +164,20 @@ export interface FileRoutesById {
   "/login": typeof LoginRoute
   "/_auth/quotas": typeof AuthQuotasRoute
   "/_auth/usage": typeof AuthUsageRoute
+  "/admin/_admin": typeof AdminAdminRouteWithChildren
+  "/admin/login": typeof AdminLoginRoute
   "/_auth/": typeof AuthIndexRoute
   "/_auth/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/_auth/ai-configs/new": typeof AuthAiConfigsNewRoute
   "/_auth/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/_auth/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
+  "/admin/_admin/usage": typeof AdminAdminUsageRoute
   "/_auth/ai-configs/": typeof AuthAiConfigsIndexRoute
   "/_auth/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
+  "/admin/_admin/": typeof AdminAdminIndexRoute
+  "/admin/_admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
+  "/admin/_admin/tenants/new": typeof AdminAdminTenantsNewRoute
+  "/admin/_admin/tenants/": typeof AdminAdminTenantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,42 +186,64 @@ export interface FileRouteTypes {
     | "/login"
     | "/quotas"
     | "/usage"
+    | "/admin"
+    | "/admin/login"
     | "/ai-configs/$configId"
     | "/ai-configs/new"
     | "/whatsapp-accounts/$accountId"
     | "/whatsapp-accounts/new"
+    | "/admin/usage"
     | "/ai-configs/"
     | "/whatsapp-accounts/"
+    | "/admin/"
+    | "/admin/tenants/$tenantId"
+    | "/admin/tenants/new"
+    | "/admin/tenants/"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/login"
     | "/quotas"
     | "/usage"
+    | "/admin/login"
     | "/"
     | "/ai-configs/$configId"
     | "/ai-configs/new"
     | "/whatsapp-accounts/$accountId"
     | "/whatsapp-accounts/new"
+    | "/admin/usage"
     | "/ai-configs"
     | "/whatsapp-accounts"
+    | "/admin"
+    | "/admin/tenants/$tenantId"
+    | "/admin/tenants/new"
+    | "/admin/tenants"
   id:
     | "__root__"
     | "/_auth"
     | "/login"
     | "/_auth/quotas"
     | "/_auth/usage"
+    | "/admin/_admin"
+    | "/admin/login"
     | "/_auth/"
     | "/_auth/ai-configs/$configId"
     | "/_auth/ai-configs/new"
     | "/_auth/whatsapp-accounts/$accountId"
     | "/_auth/whatsapp-accounts/new"
+    | "/admin/_admin/usage"
     | "/_auth/ai-configs/"
     | "/_auth/whatsapp-accounts/"
+    | "/admin/_admin/"
+    | "/admin/_admin/tenants/$tenantId"
+    | "/admin/_admin/tenants/new"
+    | "/admin/_admin/tenants/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   LoginRoute: typeof LoginRoute
+  AdminAdminRoute: typeof AdminAdminRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -184,6 +269,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/admin/login": {
+      id: "/admin/login"
+      path: "/admin/login"
+      fullPath: "/admin/login"
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/admin/_admin": {
+      id: "/admin/_admin"
+      path: "/admin"
+      fullPath: "/admin"
+      preLoaderRoute: typeof AdminAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/_auth/usage": {
       id: "/_auth/usage"
       path: "/usage"
@@ -198,6 +297,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthQuotasRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/admin/_admin/": {
+      id: "/admin/_admin/"
+      path: "/"
+      fullPath: "/admin/"
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
     "/_auth/whatsapp-accounts/": {
       id: "/_auth/whatsapp-accounts/"
       path: "/whatsapp-accounts"
@@ -211,6 +317,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/ai-configs/"
       preLoaderRoute: typeof AuthAiConfigsIndexRouteImport
       parentRoute: typeof AuthRoute
+    }
+    "/admin/_admin/usage": {
+      id: "/admin/_admin/usage"
+      path: "/usage"
+      fullPath: "/admin/usage"
+      preLoaderRoute: typeof AdminAdminUsageRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
     "/_auth/whatsapp-accounts/new": {
       id: "/_auth/whatsapp-accounts/new"
@@ -239,6 +352,27 @@ declare module "@tanstack/react-router" {
       fullPath: "/ai-configs/$configId"
       preLoaderRoute: typeof AuthAiConfigsConfigIdRouteImport
       parentRoute: typeof AuthRoute
+    }
+    "/admin/_admin/tenants/": {
+      id: "/admin/_admin/tenants/"
+      path: "/tenants"
+      fullPath: "/admin/tenants/"
+      preLoaderRoute: typeof AdminAdminTenantsIndexRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    "/admin/_admin/tenants/new": {
+      id: "/admin/_admin/tenants/new"
+      path: "/tenants/new"
+      fullPath: "/admin/tenants/new"
+      preLoaderRoute: typeof AdminAdminTenantsNewRouteImport
+      parentRoute: typeof AdminAdminRoute
+    }
+    "/admin/_admin/tenants/$tenantId": {
+      id: "/admin/_admin/tenants/$tenantId"
+      path: "/tenants/$tenantId"
+      fullPath: "/admin/tenants/$tenantId"
+      preLoaderRoute: typeof AdminAdminTenantsTenantIdRouteImport
+      parentRoute: typeof AdminAdminRoute
     }
   }
 }
@@ -269,9 +403,31 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface AdminAdminRouteChildren {
+  AdminAdminUsageRoute: typeof AdminAdminUsageRoute
+  AdminAdminIndexRoute: typeof AdminAdminIndexRoute
+  AdminAdminTenantsTenantIdRoute: typeof AdminAdminTenantsTenantIdRoute
+  AdminAdminTenantsNewRoute: typeof AdminAdminTenantsNewRoute
+  AdminAdminTenantsIndexRoute: typeof AdminAdminTenantsIndexRoute
+}
+
+const AdminAdminRouteChildren: AdminAdminRouteChildren = {
+  AdminAdminUsageRoute: AdminAdminUsageRoute,
+  AdminAdminIndexRoute: AdminAdminIndexRoute,
+  AdminAdminTenantsTenantIdRoute: AdminAdminTenantsTenantIdRoute,
+  AdminAdminTenantsNewRoute: AdminAdminTenantsNewRoute,
+  AdminAdminTenantsIndexRoute: AdminAdminTenantsIndexRoute,
+}
+
+const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
+  AdminAdminRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
+  AdminAdminRoute: AdminAdminRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

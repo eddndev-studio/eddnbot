@@ -65,6 +65,7 @@ services:
       GOOGLE_GEMINI_API_KEY: ${GOOGLE_GEMINI_API_KEY}
       WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET}
       WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN}
+      ADMIN_SECRET: ${ADMIN_SECRET}
     depends_on:
       postgres:
         condition: service_healthy

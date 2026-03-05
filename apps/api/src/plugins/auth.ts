@@ -11,6 +11,7 @@ declare module "fastify" {
   }
   interface FastifyContextConfig {
     skipAuth?: boolean;
+    adminOnly?: boolean;
   }
 }
 
@@ -19,6 +20,14 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
   app.decorateRequest("apiKey", null);
 
   app.addHook("onRequest", async (request, reply) => {
+    if (request.routeOptions.config?.adminOnly) {
+      const token = request.headers["x-admin-token"] as string | undefined;
+      if (!token || token !== app.env.ADMIN_SECRET) {
+        return reply.code(401).send({ error: "Invalid admin token" });
+      }
+      return;
+    }
+
     if (request.routeOptions.config?.skipAuth) return;
 
     const rawKey = request.headers["x-api-key"] as string | undefined;

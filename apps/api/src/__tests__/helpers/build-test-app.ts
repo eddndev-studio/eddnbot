@@ -13,6 +13,7 @@ const testEnv: Env = {
   WHATSAPP_APP_SECRET: "test-whatsapp-app-secret",
   WHATSAPP_VERIFY_TOKEN: "test-whatsapp-verify-token",
   WHATSAPP_API_VERSION: "v21.0",
+  ADMIN_SECRET: "test-admin-secret-that-is-at-least-32-chars-long",
 };
 
 export function buildTestApp() {

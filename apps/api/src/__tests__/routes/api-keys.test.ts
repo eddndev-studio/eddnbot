@@ -2,7 +2,10 @@ import { describe, it, expect, afterAll } from "vitest";
 import { buildTestApp } from "../helpers/build-test-app";
 import { seedTenant, seedApiKey } from "../helpers/seed";
 
-describe("api-key routes", () => {
+const ADMIN_SECRET = "test-admin-secret-that-is-at-least-32-chars-long";
+const adminHeaders = { "x-admin-token": ADMIN_SECRET };
+
+describe("admin api-key routes", () => {
   const appPromise = buildTestApp();
 
   afterAll(async () => {
@@ -10,14 +13,15 @@ describe("api-key routes", () => {
     await app.close();
   });
 
-  describe("POST /tenants/:tenantId/api-keys", () => {
+  describe("POST /admin/tenants/:tenantId/api-keys", () => {
     it("creates an API key and returns 201 with rawKey", async () => {
       const app = await appPromise;
       const tenant = await seedTenant({ slug: "ak-create" });
 
       const res = await app.inject({
         method: "POST",
-        url: `/tenants/${tenant.id}/api-keys`,
+        url: `/admin/tenants/${tenant.id}/api-keys`,
+        headers: adminHeaders,
         payload: { scopes: ["read"] },
       });
 
@@ -36,7 +40,8 @@ describe("api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/tenants/${tenant.id}/api-keys`,
+        url: `/admin/tenants/${tenant.id}/api-keys`,
+        headers: adminHeaders,
         payload: {},
       });
 
@@ -51,7 +56,8 @@ describe("api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/tenants/${tenant.id}/api-keys`,
+        url: `/admin/tenants/${tenant.id}/api-keys`,
+        headers: adminHeaders,
         payload: { expiresAt },
       });
 
@@ -59,21 +65,39 @@ describe("api-key routes", () => {
       expect(res.json().expiresAt).toBeDefined();
     });
 
-    it("does not require auth (skipAuth)", async () => {
+    it("requires admin token", async () => {
       const app = await appPromise;
       const tenant = await seedTenant({ slug: "ak-no-auth" });
 
       const res = await app.inject({
         method: "POST",
-        url: `/tenants/${tenant.id}/api-keys`,
+        url: `/admin/tenants/${tenant.id}/api-keys`,
         payload: {},
       });
 
-      expect(res.statusCode).toBe(201);
+      expect(res.statusCode).toBe(401);
     });
   });
 
-  describe("DELETE /tenants/:tenantId/api-keys/:keyId", () => {
+  describe("GET /admin/tenants/:tenantId/api-keys", () => {
+    it("lists API keys for a tenant", async () => {
+      const app = await appPromise;
+      const tenant = await seedTenant({ slug: "ak-list" });
+      await seedApiKey(tenant.id);
+      await seedApiKey(tenant.id);
+
+      const res = await app.inject({
+        method: "GET",
+        url: `/admin/tenants/${tenant.id}/api-keys`,
+        headers: adminHeaders,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json().apiKeys).toHaveLength(2);
+    });
+  });
+
+  describe("DELETE /admin/tenants/:tenantId/api-keys/:keyId", () => {
     it("revokes an API key and returns 200", async () => {
       const app = await appPromise;
       const tenant = await seedTenant({ slug: "ak-revoke" });
@@ -81,7 +105,8 @@ describe("api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        url: `/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        headers: adminHeaders,
       });
 
       expect(res.statusCode).toBe(200);
@@ -94,7 +119,8 @@ describe("api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/tenants/${tenant.id}/api-keys/00000000-0000-0000-0000-000000000000`,
+        url: `/admin/tenants/${tenant.id}/api-keys/00000000-0000-0000-0000-000000000000`,
+        headers: adminHeaders,
       });
 
       expect(res.statusCode).toBe(404);
@@ -107,7 +133,8 @@ describe("api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        url: `/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        headers: adminHeaders,
       });
 
       expect(res.statusCode).toBe(404);

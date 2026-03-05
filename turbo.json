@@ -23,7 +23,8 @@
         "GOOGLE_GEMINI_API_KEY",
         "WHATSAPP_APP_SECRET",
         "WHATSAPP_VERIFY_TOKEN",
-        "WHATSAPP_API_VERSION"
+        "WHATSAPP_API_VERSION",
+        "ADMIN_SECRET"
       ]
     },
     "db:generate": {

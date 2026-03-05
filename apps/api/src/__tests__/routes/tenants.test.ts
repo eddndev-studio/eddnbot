@@ -2,7 +2,10 @@ import { describe, it, expect, afterAll } from "vitest";
 import { buildTestApp } from "../helpers/build-test-app";
 import { seedTenant } from "../helpers/seed";
 
-describe("POST /tenants", () => {
+const ADMIN_SECRET = "test-admin-secret-that-is-at-least-32-chars-long";
+const adminHeaders = { "x-admin-token": ADMIN_SECRET };
+
+describe("POST /admin/tenants", () => {
   const appPromise = buildTestApp();
 
   afterAll(async () => {
@@ -14,7 +17,8 @@ describe("POST /tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/tenants",
+      url: "/admin/tenants",
+      headers: adminHeaders,
       payload: { name: "Acme Corp", slug: "acme-corp" },
     });
 
@@ -30,7 +34,8 @@ describe("POST /tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/tenants",
+      url: "/admin/tenants",
+      headers: adminHeaders,
       payload: { slug: "no-name" },
     });
 
@@ -42,7 +47,8 @@ describe("POST /tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/tenants",
+      url: "/admin/tenants",
+      headers: adminHeaders,
       payload: { name: "Test", slug: "INVALID SLUG!" },
     });
 
@@ -55,7 +61,8 @@ describe("POST /tenants", () => {
 
     const res = await app.inject({
       method: "POST",
-      url: "/tenants",
+      url: "/admin/tenants",
+      headers: adminHeaders,
       payload: { name: "Second", slug: "dup-slug" },
     });
 
@@ -63,14 +70,14 @@ describe("POST /tenants", () => {
     expect(res.json().error).toBe("Slug already exists");
   });
 
-  it("does not require auth (skipAuth)", async () => {
+  it("requires admin token (returns 401 without it)", async () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/tenants",
+      url: "/admin/tenants",
       payload: { name: "No Auth", slug: "no-auth" },
     });
 
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(401);
   });
 });

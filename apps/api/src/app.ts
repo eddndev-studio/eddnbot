@@ -12,8 +12,6 @@ import { redisPlugin } from "./plugins/redis";
 import { rateLimitPlugin } from "./plugins/rate-limit";
 import { usageTrackingPlugin } from "./plugins/usage-tracking";
 import { healthRoutes } from "./routes/health";
-import { tenantRoutes } from "./routes/tenants";
-import { apiKeyRoutes } from "./routes/api-keys";
 import { aiConfigRoutes } from "./routes/ai-configs";
 import { aiChatRoutes } from "./routes/ai-chat";
 import { aiTranscribeRoutes } from "./routes/ai-transcribe";
@@ -22,6 +20,11 @@ import { whatsappWebhookRoutes } from "./routes/whatsapp-webhook";
 import { whatsappSendRoutes } from "./routes/whatsapp-send";
 import { tenantQuotaRoutes } from "./routes/tenant-quotas";
 import { usageRoutes } from "./routes/usage";
+import { adminAuthRoutes } from "./routes/admin/auth";
+import { adminTenantRoutes } from "./routes/admin/tenants";
+import { adminApiKeyRoutes } from "./routes/admin/api-keys";
+import { adminOverviewRoutes } from "./routes/admin/overview";
+import { adminUsageRoutes } from "./routes/admin/usage";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -67,10 +70,15 @@ export async function buildApp(env: Env) {
   await app.register(rateLimitPlugin);
   await app.register(usageTrackingPlugin);
 
-  // Routes
+  // Admin routes
+  await app.register(adminAuthRoutes);
+  await app.register(adminTenantRoutes);
+  await app.register(adminApiKeyRoutes);
+  await app.register(adminOverviewRoutes);
+  await app.register(adminUsageRoutes);
+
+  // Tenant routes
   await app.register(healthRoutes);
-  await app.register(tenantRoutes);
-  await app.register(apiKeyRoutes);
   await app.register(aiConfigRoutes);
   await app.register(aiChatRoutes);
   await app.register(aiTranscribeRoutes);

@@ -58,7 +58,9 @@ export function WhatsAppAccountForm({ mode, accountId }: Props) {
     }
   }, [existing, mode]);
 
-  if (mode === "edit" && isLoading) {
+  const aiConfigsLoading = !aiConfigs;
+
+  if (mode === "edit" && (isLoading || aiConfigsLoading)) {
     return <Skeleton className="h-96 rounded-lg bg-neutral-800" />;
   }
 

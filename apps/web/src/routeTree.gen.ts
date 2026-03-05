@@ -9,7 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as TermsRouteImport } from "./routes/terms"
+import { Route as PrivacyRouteImport } from "./routes/privacy"
 import { Route as LoginRouteImport } from "./routes/login"
+import { Route as DataDeletionRouteImport } from "./routes/data-deletion"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as AuthIndexRouteImport } from "./routes/_auth/index"
 import { Route as AdminLoginRouteImport } from "./routes/admin/login"
@@ -28,9 +31,24 @@ import { Route as AdminAdminTenantsIndexRouteImport } from "./routes/admin/_admi
 import { Route as AdminAdminTenantsNewRouteImport } from "./routes/admin/_admin/tenants/new"
 import { Route as AdminAdminTenantsTenantIdRouteImport } from "./routes/admin/_admin/tenants/$tenantId"
 
+const TermsRoute = TermsRouteImport.update({
+  id: "/terms",
+  path: "/terms",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: "/privacy",
+  path: "/privacy",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: "/login",
   path: "/login",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataDeletionRoute = DataDeletionRouteImport.update({
+  id: "/data-deletion",
+  path: "/data-deletion",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -123,7 +141,10 @@ const AdminAdminTenantsTenantIdRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof AuthIndexRoute
+  "/data-deletion": typeof DataDeletionRoute
   "/login": typeof LoginRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/quotas": typeof AuthQuotasRoute
   "/usage": typeof AuthUsageRoute
   "/admin": typeof AdminAdminRouteWithChildren
@@ -141,7 +162,10 @@ export interface FileRoutesByFullPath {
   "/admin/tenants/": typeof AdminAdminTenantsIndexRoute
 }
 export interface FileRoutesByTo {
+  "/data-deletion": typeof DataDeletionRoute
   "/login": typeof LoginRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/quotas": typeof AuthQuotasRoute
   "/usage": typeof AuthUsageRoute
   "/admin/login": typeof AdminLoginRoute
@@ -161,7 +185,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/_auth": typeof AuthRouteWithChildren
+  "/data-deletion": typeof DataDeletionRoute
   "/login": typeof LoginRoute
+  "/privacy": typeof PrivacyRoute
+  "/terms": typeof TermsRoute
   "/_auth/quotas": typeof AuthQuotasRoute
   "/_auth/usage": typeof AuthUsageRoute
   "/admin/_admin": typeof AdminAdminRouteWithChildren
@@ -183,7 +210,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | "/"
+    | "/data-deletion"
     | "/login"
+    | "/privacy"
+    | "/terms"
     | "/quotas"
     | "/usage"
     | "/admin"
@@ -201,7 +231,10 @@ export interface FileRouteTypes {
     | "/admin/tenants/"
   fileRoutesByTo: FileRoutesByTo
   to:
+    | "/data-deletion"
     | "/login"
+    | "/privacy"
+    | "/terms"
     | "/quotas"
     | "/usage"
     | "/admin/login"
@@ -220,7 +253,10 @@ export interface FileRouteTypes {
   id:
     | "__root__"
     | "/_auth"
+    | "/data-deletion"
     | "/login"
+    | "/privacy"
+    | "/terms"
     | "/_auth/quotas"
     | "/_auth/usage"
     | "/admin/_admin"
@@ -241,18 +277,42 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
+  DataDeletionRoute: typeof DataDeletionRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   AdminAdminRoute: typeof AdminAdminRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/terms": {
+      id: "/terms"
+      path: "/terms"
+      fullPath: "/terms"
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/privacy": {
+      id: "/privacy"
+      path: "/privacy"
+      fullPath: "/privacy"
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/login": {
       id: "/login"
       path: "/login"
       fullPath: "/login"
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/data-deletion": {
+      id: "/data-deletion"
+      path: "/data-deletion"
+      fullPath: "/data-deletion"
+      preLoaderRoute: typeof DataDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/_auth": {
@@ -425,7 +485,10 @@ const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
+  DataDeletionRoute: DataDeletionRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   AdminAdminRoute: AdminAdminRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
 }

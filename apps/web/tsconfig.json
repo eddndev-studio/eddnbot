@@ -1,19 +1,10 @@
 {
-  "extends": "@eddnbot/config-ts/nextjs.json",
+  "extends": "@eddnbot/config-ts/vite.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "allowJs": true
+      "@/*": ["./src/*"]
+    }
   },
-  "include": [
-    "src",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

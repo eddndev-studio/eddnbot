@@ -1,5 +1,5 @@
 {
   "name": "@eddnbot/config-ts",
   "private": true,
-  "files": ["base.json", "node.json", "nextjs.json"]
+  "files": ["base.json", "node.json", "nextjs.json", "vite.json"]
 }

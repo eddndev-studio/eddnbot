@@ -131,8 +131,8 @@ describe("GET /conversations", () => {
     const { rawKey } = await seedApiKey(tenant.id);
     const account1 = await seedWhatsAppAccount(tenant.id);
     const account2 = await seedWhatsAppAccount(tenant.id);
-    await seedConversation(account1.id, { contactName: "Acc1" });
-    await seedConversation(account2.id, { contactName: "Acc2" });
+    await seedConversation(account1.id, { contactName: "Acc1", contactPhone: "5491000000001" });
+    await seedConversation(account2.id, { contactName: "Acc2", contactPhone: "5491000000002" });
 
     const response = await app.inject({
       method: "GET",
@@ -149,8 +149,8 @@ describe("GET /conversations", () => {
     const tenant = await seedTenant();
     const { rawKey } = await seedApiKey(tenant.id);
     const account = await seedWhatsAppAccount(tenant.id);
-    await seedConversation(account.id, { status: "active", contactName: "Active" });
-    await seedConversation(account.id, { status: "closed", contactName: "Closed" });
+    await seedConversation(account.id, { status: "active", contactName: "Active", contactPhone: "5491000000001" });
+    await seedConversation(account.id, { status: "closed", contactName: "Closed", contactPhone: "5491000000002" });
 
     const response = await app.inject({
       method: "GET",
@@ -186,7 +186,7 @@ describe("GET /conversations", () => {
     const { rawKey } = await seedApiKey(tenant.id);
     const account = await seedWhatsAppAccount(tenant.id);
     for (let i = 0; i < 5; i++) {
-      await seedConversation(account.id);
+      await seedConversation(account.id, { contactPhone: `549100000000${i}` });
     }
 
     const response = await app.inject({
@@ -208,10 +208,12 @@ describe("GET /conversations", () => {
     const { rawKey } = await seedApiKey(tenant.id);
     const account = await seedWhatsAppAccount(tenant.id);
     await seedConversation(account.id, {
+      contactPhone: "5491000000001",
       contactName: "Older",
       updatedAt: new Date("2024-01-01"),
     });
     await seedConversation(account.id, {
+      contactPhone: "5491000000002",
       contactName: "Newer",
       updatedAt: new Date("2024-06-01"),
     });
@@ -415,8 +417,8 @@ describe("GET /conversations/stats", () => {
     const tenant = await seedTenant();
     const { rawKey } = await seedApiKey(tenant.id);
     const account = await seedWhatsAppAccount(tenant.id);
-    const conv1 = await seedConversation(account.id, { status: "active" });
-    const conv2 = await seedConversation(account.id, { status: "closed" });
+    const conv1 = await seedConversation(account.id, { status: "active", contactPhone: "5491000000001" });
+    const conv2 = await seedConversation(account.id, { status: "closed", contactPhone: "5491000000002" });
     // Add an unread inbound message to conv1
     await seedMessage(conv1.id, { direction: "inbound" });
     // Add a read message to conv2

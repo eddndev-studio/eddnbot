@@ -115,11 +115,12 @@ export async function conversationRoutes(app: FastifyInstance) {
       .limit(query.limit)
       .offset(offset);
 
-    // Fetch last message for each conversation
+    // Fetch last message for each conversation using individual subqueries
     const conversationIds = rows.map((r) => r.id);
-    let lastMessages: Record<string, { content: Record<string, unknown>; direction: string; type: string; createdAt: Date }> = {};
+    const lastMessages: Record<string, { content: Record<string, unknown>; direction: string; type: string; createdAt: Date }> = {};
 
     if (conversationIds.length > 0) {
+      const idList = sql.join(conversationIds.map((id) => sql`${id}`), sql`, `);
       const lastMsgRows = await app.db.execute(sql`
         SELECT DISTINCT ON (m.conversation_id)
           m.conversation_id,
@@ -128,7 +129,7 @@ export async function conversationRoutes(app: FastifyInstance) {
           m.type,
           m.created_at
         FROM messages m
-        WHERE m.conversation_id = ANY(${conversationIds})
+        WHERE m.conversation_id IN (${idList})
         ORDER BY m.conversation_id, m.created_at DESC
       `);
 

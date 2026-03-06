@@ -1,6 +1,7 @@
-import { Brain, MessageCircle, Globe, Gauge } from "lucide-react";
+import { Brain, MessageCircle, Globe, Gauge, MessagesSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUsage } from "@/hooks/use-usage";
+import { useConversationStats } from "@/hooks/use-conversations";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -62,6 +63,7 @@ function MetricCard({ title, value, limit, accent, accentBg, icon, breakdown }: 
 
 export function DashboardHome() {
   const { data, isLoading } = useUsage();
+  const { data: convStats } = useConversationStats();
 
   if (isLoading) {
     return (
@@ -112,6 +114,20 @@ export function DashboardHome() {
           accentBg="bg-violet-500"
           icon={<Globe className="size-4" />}
         />
+        {convStats && (
+          <MetricCard
+            title="Conversations"
+            value={convStats.total}
+            limit={null}
+            accent="text-pink-400"
+            accentBg="bg-pink-500"
+            icon={<MessagesSquare className="size-4" />}
+            breakdown={{
+              Active: convStats.active,
+              Unread: convStats.unread,
+            }}
+          />
+        )}
         {q && (
           <MetricCard
             title="Rate Limit"

@@ -19,6 +19,7 @@ import { whatsappAccountRoutes } from "./routes/whatsapp-accounts";
 import { whatsappWebhookRoutes } from "./routes/whatsapp-webhook";
 import { whatsappSendRoutes } from "./routes/whatsapp-send";
 import { tenantQuotaRoutes } from "./routes/tenant-quotas";
+import { conversationRoutes } from "./routes/conversations";
 import { usageRoutes } from "./routes/usage";
 import { adminAuthRoutes } from "./routes/admin/auth";
 import { adminTenantRoutes } from "./routes/admin/tenants";
@@ -85,6 +86,7 @@ export async function buildApp(env: Env) {
   await app.register(whatsappWebhookRoutes);
   await app.register(whatsappAccountRoutes);
   await app.register(whatsappSendRoutes);
+  await app.register(conversationRoutes);
   await app.register(tenantQuotaRoutes);
   await app.register(usageRoutes);
 

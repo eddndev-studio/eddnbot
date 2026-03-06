@@ -21,10 +21,12 @@ import { Route as AuthUsageRouteImport } from "./routes/_auth/usage"
 import { Route as AuthQuotasRouteImport } from "./routes/_auth/quotas"
 import { Route as AdminAdminIndexRouteImport } from "./routes/admin/_admin/index"
 import { Route as AuthWhatsappAccountsIndexRouteImport } from "./routes/_auth/whatsapp-accounts/index"
+import { Route as AuthConversationsIndexRouteImport } from "./routes/_auth/conversations/index"
 import { Route as AuthAiConfigsIndexRouteImport } from "./routes/_auth/ai-configs/index"
 import { Route as AdminAdminUsageRouteImport } from "./routes/admin/_admin/usage"
 import { Route as AuthWhatsappAccountsNewRouteImport } from "./routes/_auth/whatsapp-accounts/new"
 import { Route as AuthWhatsappAccountsAccountIdRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId"
+import { Route as AuthConversationsConversationIdRouteImport } from "./routes/_auth/conversations/$conversationId"
 import { Route as AuthAiConfigsNewRouteImport } from "./routes/_auth/ai-configs/new"
 import { Route as AuthAiConfigsConfigIdRouteImport } from "./routes/_auth/ai-configs/$configId"
 import { Route as AdminAdminTenantsIndexRouteImport } from "./routes/admin/_admin/tenants/index"
@@ -91,6 +93,11 @@ const AuthWhatsappAccountsIndexRoute =
     path: "/whatsapp-accounts/",
     getParentRoute: () => AuthRoute,
   } as any)
+const AuthConversationsIndexRoute = AuthConversationsIndexRouteImport.update({
+  id: "/conversations/",
+  path: "/conversations/",
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthAiConfigsIndexRoute = AuthAiConfigsIndexRouteImport.update({
   id: "/ai-configs/",
   path: "/ai-configs/",
@@ -110,6 +117,12 @@ const AuthWhatsappAccountsAccountIdRoute =
   AuthWhatsappAccountsAccountIdRouteImport.update({
     id: "/whatsapp-accounts/$accountId",
     path: "/whatsapp-accounts/$accountId",
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthConversationsConversationIdRoute =
+  AuthConversationsConversationIdRouteImport.update({
+    id: "/conversations/$conversationId",
+    path: "/conversations/$conversationId",
     getParentRoute: () => AuthRoute,
   } as any)
 const AuthAiConfigsNewRoute = AuthAiConfigsNewRouteImport.update({
@@ -151,10 +164,12 @@ export interface FileRoutesByFullPath {
   "/admin/login": typeof AdminLoginRoute
   "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/ai-configs/new": typeof AuthAiConfigsNewRoute
+  "/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
   "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
   "/admin/usage": typeof AdminAdminUsageRoute
   "/ai-configs/": typeof AuthAiConfigsIndexRoute
+  "/conversations/": typeof AuthConversationsIndexRoute
   "/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
   "/admin/": typeof AdminAdminIndexRoute
   "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
@@ -172,10 +187,12 @@ export interface FileRoutesByTo {
   "/": typeof AuthIndexRoute
   "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/ai-configs/new": typeof AuthAiConfigsNewRoute
+  "/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
   "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
   "/admin/usage": typeof AdminAdminUsageRoute
   "/ai-configs": typeof AuthAiConfigsIndexRoute
+  "/conversations": typeof AuthConversationsIndexRoute
   "/whatsapp-accounts": typeof AuthWhatsappAccountsIndexRoute
   "/admin": typeof AdminAdminIndexRoute
   "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
@@ -196,10 +213,12 @@ export interface FileRoutesById {
   "/_auth/": typeof AuthIndexRoute
   "/_auth/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
   "/_auth/ai-configs/new": typeof AuthAiConfigsNewRoute
+  "/_auth/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
   "/_auth/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRoute
   "/_auth/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
   "/admin/_admin/usage": typeof AdminAdminUsageRoute
   "/_auth/ai-configs/": typeof AuthAiConfigsIndexRoute
+  "/_auth/conversations/": typeof AuthConversationsIndexRoute
   "/_auth/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
   "/admin/_admin/": typeof AdminAdminIndexRoute
   "/admin/_admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
@@ -220,10 +239,12 @@ export interface FileRouteTypes {
     | "/admin/login"
     | "/ai-configs/$configId"
     | "/ai-configs/new"
+    | "/conversations/$conversationId"
     | "/whatsapp-accounts/$accountId"
     | "/whatsapp-accounts/new"
     | "/admin/usage"
     | "/ai-configs/"
+    | "/conversations/"
     | "/whatsapp-accounts/"
     | "/admin/"
     | "/admin/tenants/$tenantId"
@@ -241,10 +262,12 @@ export interface FileRouteTypes {
     | "/"
     | "/ai-configs/$configId"
     | "/ai-configs/new"
+    | "/conversations/$conversationId"
     | "/whatsapp-accounts/$accountId"
     | "/whatsapp-accounts/new"
     | "/admin/usage"
     | "/ai-configs"
+    | "/conversations"
     | "/whatsapp-accounts"
     | "/admin"
     | "/admin/tenants/$tenantId"
@@ -264,10 +287,12 @@ export interface FileRouteTypes {
     | "/_auth/"
     | "/_auth/ai-configs/$configId"
     | "/_auth/ai-configs/new"
+    | "/_auth/conversations/$conversationId"
     | "/_auth/whatsapp-accounts/$accountId"
     | "/_auth/whatsapp-accounts/new"
     | "/admin/_admin/usage"
     | "/_auth/ai-configs/"
+    | "/_auth/conversations/"
     | "/_auth/whatsapp-accounts/"
     | "/admin/_admin/"
     | "/admin/_admin/tenants/$tenantId"
@@ -371,6 +396,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthWhatsappAccountsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
+    "/_auth/conversations/": {
+      id: "/_auth/conversations/"
+      path: "/conversations"
+      fullPath: "/conversations/"
+      preLoaderRoute: typeof AuthConversationsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
     "/_auth/ai-configs/": {
       id: "/_auth/ai-configs/"
       path: "/ai-configs"
@@ -397,6 +429,13 @@ declare module "@tanstack/react-router" {
       path: "/whatsapp-accounts/$accountId"
       fullPath: "/whatsapp-accounts/$accountId"
       preLoaderRoute: typeof AuthWhatsappAccountsAccountIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    "/_auth/conversations/$conversationId": {
+      id: "/_auth/conversations/$conversationId"
+      path: "/conversations/$conversationId"
+      fullPath: "/conversations/$conversationId"
+      preLoaderRoute: typeof AuthConversationsConversationIdRouteImport
       parentRoute: typeof AuthRoute
     }
     "/_auth/ai-configs/new": {
@@ -443,9 +482,11 @@ interface AuthRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   AuthAiConfigsConfigIdRoute: typeof AuthAiConfigsConfigIdRoute
   AuthAiConfigsNewRoute: typeof AuthAiConfigsNewRoute
+  AuthConversationsConversationIdRoute: typeof AuthConversationsConversationIdRoute
   AuthWhatsappAccountsAccountIdRoute: typeof AuthWhatsappAccountsAccountIdRoute
   AuthWhatsappAccountsNewRoute: typeof AuthWhatsappAccountsNewRoute
   AuthAiConfigsIndexRoute: typeof AuthAiConfigsIndexRoute
+  AuthConversationsIndexRoute: typeof AuthConversationsIndexRoute
   AuthWhatsappAccountsIndexRoute: typeof AuthWhatsappAccountsIndexRoute
 }
 
@@ -455,9 +496,11 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   AuthAiConfigsConfigIdRoute: AuthAiConfigsConfigIdRoute,
   AuthAiConfigsNewRoute: AuthAiConfigsNewRoute,
+  AuthConversationsConversationIdRoute: AuthConversationsConversationIdRoute,
   AuthWhatsappAccountsAccountIdRoute: AuthWhatsappAccountsAccountIdRoute,
   AuthWhatsappAccountsNewRoute: AuthWhatsappAccountsNewRoute,
   AuthAiConfigsIndexRoute: AuthAiConfigsIndexRoute,
+  AuthConversationsIndexRoute: AuthConversationsIndexRoute,
   AuthWhatsappAccountsIndexRoute: AuthWhatsappAccountsIndexRoute,
 }
 

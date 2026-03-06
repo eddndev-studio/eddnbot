@@ -18,6 +18,7 @@ export default defineConfig({
       "/ai": "http://localhost:3001",
       "/whatsapp": "http://localhost:3001",
       "/quotas": "http://localhost:3001",
+      "/conversations": "http://localhost:3001",
       "/usage": "http://localhost:3001",
     },
   },

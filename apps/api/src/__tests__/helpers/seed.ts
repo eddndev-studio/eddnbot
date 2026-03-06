@@ -1,4 +1,4 @@
-import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, tenantQuotas, usageEvents } from "@eddnbot/db/schema";
+import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents } from "@eddnbot/db/schema";
 import { generateApiKey } from "../../lib/api-key-utils";
 import { testDb } from "./test-db";
 
@@ -77,6 +77,23 @@ export async function seedConversation(
     })
     .returning();
   return conversation;
+}
+
+export async function seedMessage(
+  conversationId: string,
+  overrides: Partial<typeof messages.$inferInsert> = {},
+) {
+  const [message] = await testDb
+    .insert(messages)
+    .values({
+      conversationId,
+      direction: "inbound",
+      type: "text",
+      content: { body: "Hello" },
+      ...overrides,
+    })
+    .returning();
+  return message;
 }
 
 export async function seedTenantQuota(

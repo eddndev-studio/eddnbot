@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Brain,
   MessageCircle,
+  MessagesSquare,
   Gauge,
   BarChart3,
 } from "lucide-react";
@@ -12,6 +13,7 @@ const items = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/ai-configs", label: "AI Configs", icon: Brain },
   { to: "/whatsapp-accounts", label: "WhatsApp", icon: MessageCircle },
+  { to: "/conversations", label: "Conversations", icon: MessagesSquare },
   { to: "/quotas", label: "Quotas", icon: Gauge },
   { to: "/usage", label: "Usage", icon: BarChart3 },
 ] as const;

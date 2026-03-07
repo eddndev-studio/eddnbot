@@ -47,6 +47,7 @@ export const MODEL_REGISTRY: ModelDefinition[] = [
   { id: "gemini-3-flash-preview", provider: "gemini", name: "Gemini 3 Flash", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
   { id: "gemini-3.1-pro-preview", provider: "gemini", name: "Gemini 3.1 Pro", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
   { id: "gemini-3.1-flash-lite-preview", provider: "gemini", name: "Gemini 3.1 Flash Lite", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
+  { id: "gemini-3.1-pro-preview-customtools", provider: "gemini", name: "Gemini 3.1 Pro Custom Tools", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
 ];
 
 export function getModelsByProvider(provider: AiProvider): ModelDefinition[] {

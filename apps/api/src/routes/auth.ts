@@ -380,6 +380,40 @@ export async function authRoutes(app: FastifyInstance) {
     },
   );
 
+  // GET /auth/me (requires accountAuth)
+  app.get(
+    "/auth/me",
+    { config: { accountAuth: true } },
+    async (request) => {
+      const account = request.account!;
+
+      const memberships = await app.db
+        .select({
+          tenantId: tenantMembers.tenantId,
+          role: tenantMembers.role,
+          tenantName: tenants.name,
+          tenantSlug: tenants.slug,
+        })
+        .from(tenantMembers)
+        .innerJoin(tenants, eq(tenantMembers.tenantId, tenants.id))
+        .where(
+          and(
+            eq(tenantMembers.accountId, account.id),
+            eq(tenants.isActive, true),
+          ),
+        );
+
+      return {
+        account: {
+          id: account.id,
+          email: account.email,
+          name: account.name,
+        },
+        tenants: memberships,
+      };
+    },
+  );
+
   // POST /auth/logout
   app.post(
     "/auth/logout",

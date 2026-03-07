@@ -9,7 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@aws-sdk/client-ses": "^3.1004.0"
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "@eddnbot/config-ts": "workspace:*",

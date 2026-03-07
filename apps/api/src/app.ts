@@ -69,12 +69,10 @@ export async function buildApp(env: Env) {
       : createFilesystemStorage(env.MEDIA_STORAGE_PATH);
   app.decorate("storage", storage);
   const email =
-    env.SES_REGION && env.SES_ACCESS_KEY_ID && env.SES_SECRET_ACCESS_KEY && env.SES_FROM_ADDRESS
+    env.RESEND_API_KEY && env.EMAIL_FROM
       ? createEmailClient({
-          region: env.SES_REGION,
-          accessKeyId: env.SES_ACCESS_KEY_ID,
-          secretAccessKey: env.SES_SECRET_ACCESS_KEY,
-          fromAddress: env.SES_FROM_ADDRESS,
+          apiKey: env.RESEND_API_KEY,
+          fromAddress: env.EMAIL_FROM,
         })
       : null;
   app.decorate("email", email);

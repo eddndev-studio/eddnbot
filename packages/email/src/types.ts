@@ -1,7 +1,5 @@
 export interface EmailClientConfig {
-  region: string;
-  accessKeyId: string;
-  secretAccessKey: string;
+  apiKey: string;
   fromAddress: string;
 }
 

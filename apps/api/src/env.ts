@@ -13,8 +13,22 @@ const envSchema = z.object({
   WHATSAPP_VERIFY_TOKEN: z.string().optional(),
   WHATSAPP_API_VERSION: z.string().default("v21.0"),
   ADMIN_SECRET: z.string().min(32),
+  // Storage
+  STORAGE_DRIVER: z.enum(["filesystem", "r2"]).default("filesystem"),
   MEDIA_STORAGE_PATH: z.string().default("/data/media"),
-});
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET: z.string().optional(),
+}).refine(
+  (env) => {
+    if (env.STORAGE_DRIVER === "r2") {
+      return !!env.R2_ACCOUNT_ID && !!env.R2_ACCESS_KEY_ID && !!env.R2_SECRET_ACCESS_KEY && !!env.R2_BUCKET;
+    }
+    return true;
+  },
+  { message: "R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, and R2_BUCKET are required when STORAGE_DRIVER=r2" },
+);
 
 export type Env = z.infer<typeof envSchema>;
 

@@ -29,7 +29,7 @@ import { adminApiKeyRoutes } from "./routes/admin/api-keys";
 import { adminOverviewRoutes } from "./routes/admin/overview";
 import { adminUsageRoutes } from "./routes/admin/usage";
 import { mediaRoutes } from "./routes/media";
-import { createFilesystemStorage, type StorageAdapter } from "./services/storage";
+import { createFilesystemStorage, createR2Storage, type StorageAdapter } from "./services/storage";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -52,7 +52,16 @@ export async function buildApp(env: Env) {
   app.decorate("env", env);
   const db = createDb(env.DATABASE_URL);
   app.decorate("db", db);
-  app.decorate("storage", createFilesystemStorage(env.MEDIA_STORAGE_PATH));
+  const storage =
+    env.STORAGE_DRIVER === "r2"
+      ? createR2Storage({
+          accountId: env.R2_ACCOUNT_ID!,
+          accessKeyId: env.R2_ACCESS_KEY_ID!,
+          secretAccessKey: env.R2_SECRET_ACCESS_KEY!,
+          bucket: env.R2_BUCKET!,
+        })
+      : createFilesystemStorage(env.MEDIA_STORAGE_PATH);
+  app.decorate("storage", storage);
   app.decorate("pendingAutoReplies", [] as Promise<void>[]);
 
   // Error handler

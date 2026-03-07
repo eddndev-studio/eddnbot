@@ -29,7 +29,7 @@ describe("auth plugin", () => {
   it("returns 401 when x-api-key header is missing on protected routes", async () => {
     const res = await app.inject({ method: "GET", url: "/test-protected" });
     expect(res.statusCode).toBe(401);
-    expect(res.json()).toEqual({ error: "Missing API key" });
+    expect(res.json()).toEqual({ error: "Missing authentication" });
   });
 
   it("returns 401 when x-api-key is invalid", async () => {

@@ -1,7 +1,7 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance } from "fastify";
 import { eq, and, isNull } from "drizzle-orm";
-import { apiKeys, tenants, chatSessions, authSessions, accounts } from "@eddnbot/db/schema";
+import { apiKeys, tenants, chatSessions, authSessions, accounts, tenantMembers } from "@eddnbot/db/schema";
 import { hashApiKey } from "../lib/api-key-utils";
 import { hashSessionToken } from "../lib/session-token-utils";
 import { hashToken } from "../lib/auth-token-utils";
@@ -21,6 +21,51 @@ declare module "fastify" {
   }
 }
 
+async function resolveAccountFromBearer(
+  app: FastifyInstance,
+  authHeader: string,
+): Promise<typeof accounts.$inferSelect | null> {
+  if (!authHeader.startsWith("Bearer ")) return null;
+
+  const rawToken = authHeader.slice(7);
+  const tokenHash = hashToken(rawToken);
+
+  const result = await app.db
+    .select()
+    .from(authSessions)
+    .innerJoin(accounts, eq(authSessions.accountId, accounts.id))
+    .where(eq(authSessions.tokenHash, tokenHash))
+    .limit(1);
+
+  if (result.length === 0) return null;
+
+  const { auth_sessions: session, accounts: account } = result[0];
+  if (session.expiresAt < new Date()) return null;
+
+  return account;
+}
+
+async function resolveTenantForAccount(
+  app: FastifyInstance,
+  accountId: string,
+  tenantId: string,
+): Promise<typeof tenants.$inferSelect | null> {
+  const result = await app.db
+    .select({ tenant: tenants })
+    .from(tenantMembers)
+    .innerJoin(tenants, eq(tenantMembers.tenantId, tenants.id))
+    .where(
+      and(
+        eq(tenantMembers.accountId, accountId),
+        eq(tenantMembers.tenantId, tenantId),
+        eq(tenants.isActive, true),
+      ),
+    )
+    .limit(1);
+
+  return result.length > 0 ? result[0].tenant : null;
+}
+
 export const authPlugin = fp(async (app: FastifyInstance) => {
   app.decorateRequest("tenant", null);
   app.decorateRequest("apiKey", null);
@@ -38,38 +83,23 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
 
     if (request.routeOptions.config?.skipAuth) return;
 
-    // Account auth (Bearer token for web/mobile user sessions)
+    // Account auth only (no tenant context needed, e.g. /auth/me)
     if (request.routeOptions.config?.accountAuth) {
       const authHeader = request.headers.authorization;
-      if (!authHeader?.startsWith("Bearer ")) {
+      if (!authHeader) {
         return reply.code(401).send({ error: "Missing access token" });
       }
 
-      const rawToken = authHeader.slice(7);
-      const tokenHash = hashToken(rawToken);
-
-      const result = await app.db
-        .select()
-        .from(authSessions)
-        .innerJoin(accounts, eq(authSessions.accountId, accounts.id))
-        .where(eq(authSessions.tokenHash, tokenHash))
-        .limit(1);
-
-      if (result.length === 0) {
-        return reply.code(401).send({ error: "Invalid access token" });
-      }
-
-      const { auth_sessions: session, accounts: account } = result[0];
-
-      if (session.expiresAt < new Date()) {
-        return reply.code(401).send({ error: "Access token expired" });
+      const account = await resolveAccountFromBearer(app, authHeader);
+      if (!account) {
+        return reply.code(401).send({ error: "Invalid or expired access token" });
       }
 
       request.account = account;
       return;
     }
 
-    // Session-based auth (Bearer token for app routes)
+    // Session-based auth (Bearer token for app/chat routes)
     if (request.routeOptions.config?.sessionAuth) {
       const authHeader = request.headers.authorization;
       if (!authHeader?.startsWith("Bearer ")) {
@@ -109,10 +139,31 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
       return;
     }
 
-    // API key auth (tenant routes)
+    // Default: API key OR Bearer + X-Tenant-Id (dual mode for tenant routes)
+    const authHeader = request.headers.authorization;
+    const tenantId = request.headers["x-tenant-id"] as string | undefined;
+
+    // Try Bearer + X-Tenant-Id first
+    if (authHeader?.startsWith("Bearer ") && tenantId) {
+      const account = await resolveAccountFromBearer(app, authHeader);
+      if (!account) {
+        return reply.code(401).send({ error: "Invalid or expired access token" });
+      }
+
+      const tenant = await resolveTenantForAccount(app, account.id, tenantId);
+      if (!tenant) {
+        return reply.code(403).send({ error: "Not a member of this tenant" });
+      }
+
+      request.account = account;
+      request.tenant = tenant;
+      return;
+    }
+
+    // Fall back to API key auth
     const rawKey = request.headers["x-api-key"] as string | undefined;
     if (!rawKey) {
-      return reply.code(401).send({ error: "Missing API key" });
+      return reply.code(401).send({ error: "Missing authentication" });
     }
 
     const keyHash = hashApiKey(rawKey);

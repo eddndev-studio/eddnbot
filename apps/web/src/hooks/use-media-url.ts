@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getAdminToken } from "@/lib/admin-client";
+import { getAccessToken, getActiveTenant } from "@/lib/api-client";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -24,7 +24,6 @@ export function useMediaUrl(waMediaId: string | undefined): {
       return;
     }
 
-    // Already cached
     const cached = blobCache.get(waMediaId);
     if (cached) {
       setUrl(cached);
@@ -38,8 +37,16 @@ export function useMediaUrl(waMediaId: string | undefined): {
     setIsLoading(true);
     setError(null);
 
+    const headers: Record<string, string> = {};
+    const token = getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+      const tenant = getActiveTenant();
+      if (tenant) headers["X-Tenant-Id"] = tenant.tenantId;
+    }
+
     fetch(`${API_BASE}/media/${waMediaId}`, {
-      headers: { "X-Admin-Token": getAdminToken() ?? "" },
+      headers,
       signal: controller.signal,
     })
       .then((res) => {

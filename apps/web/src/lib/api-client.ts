@@ -123,8 +123,13 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const apiKey = getApiKey();
 
   const headers: Record<string, string> = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  else if (apiKey) headers["X-API-Key"] = apiKey;
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+    const tenant = getActiveTenant();
+    if (tenant) headers["X-Tenant-Id"] = tenant.tenantId;
+  } else if (apiKey) {
+    headers["X-API-Key"] = apiKey;
+  }
   if (body) headers["Content-Type"] = "application/json";
 
   let res = await fetch(`${API_BASE}${path}`, {

@@ -1,4 +1,5 @@
 export { createWhatsAppClient } from "./client";
+export { createTemplateClient } from "./template-client";
 export { verifyWebhookSignature, verifyChallenge, parseWebhookPayload } from "./webhook";
 export { WhatsAppError, WhatsAppApiError, WebhookVerificationError } from "./errors";
 export type {
@@ -26,3 +27,14 @@ export type {
   WebhookError,
   ParsedWebhookEvent,
 } from "./types";
+export type {
+  TemplateCategory,
+  TemplateStatus,
+  TemplateComponent,
+  MessageTemplate,
+  CreateTemplateRequest,
+  CreateTemplateResponse,
+  TemplateListFilters,
+  TemplateClientConfig,
+  TemplateAdapter,
+} from "./template-types";

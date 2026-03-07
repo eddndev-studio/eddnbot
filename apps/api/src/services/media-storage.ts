@@ -1,11 +1,7 @@
-import { mkdir, writeFile, unlink, stat } from "node:fs/promises";
-import { createReadStream, type ReadStream } from "node:fs";
-import { dirname } from "node:path";
 import { eq } from "drizzle-orm";
 import { media } from "@eddnbot/db/schema";
 import type { Database } from "@eddnbot/db/client";
-
-const DEFAULT_STORAGE_PATH = "/data/media";
+import type { StorageAdapter } from "./storage";
 
 export interface SaveMediaParams {
   tenantId: string;
@@ -28,26 +24,20 @@ export interface MediaRecord {
   createdAt: Date;
 }
 
-export function getStoragePath(basePath: string, waMediaId: string): string {
-  return `${basePath}/${waMediaId}`;
-}
-
-export function resolveBasePath(env?: { MEDIA_STORAGE_PATH?: string }): string {
-  return env?.MEDIA_STORAGE_PATH ?? DEFAULT_STORAGE_PATH;
+/** Build a logical storage key from tenant and media IDs. */
+export function storageKey(tenantId: string, waMediaId: string): string {
+  return `${tenantId}/${waMediaId}`;
 }
 
 export async function saveMedia(
   db: Database,
-  basePath: string,
+  storage: StorageAdapter,
   params: SaveMediaParams,
 ): Promise<MediaRecord> {
-  const filePath = getStoragePath(basePath, params.waMediaId);
+  const key = storageKey(params.tenantId, params.waMediaId);
 
-  // Ensure directory exists
-  await mkdir(dirname(filePath), { recursive: true });
-
-  // Write file to disk
-  await writeFile(filePath, params.buffer);
+  // Write to object storage
+  await storage.put(key, params.buffer, params.mimeType);
 
   // Insert metadata into DB (skip if duplicate)
   const [row] = await db
@@ -58,7 +48,7 @@ export async function saveMedia(
       messageId: params.messageId ?? null,
       mimeType: params.mimeType,
       fileSize: params.buffer.length,
-      storagePath: filePath,
+      storagePath: key,
       originalFilename: params.originalFilename ?? null,
     })
     .onConflictDoNothing({ target: media.waMediaId })
@@ -89,40 +79,23 @@ export async function getMediaByWaId(
   return row ?? null;
 }
 
-export function getMediaStream(storagePath: string): ReadStream {
-  return createReadStream(storagePath);
-}
-
-export async function getMediaBuffer(storagePath: string): Promise<Buffer> {
-  const { readFile } = await import("node:fs/promises");
-  return readFile(storagePath);
+export async function getMediaBuffer(
+  storage: StorageAdapter,
+  key: string,
+): Promise<Buffer | null> {
+  return storage.get(key);
 }
 
 export async function deleteMedia(
   db: Database,
+  storage: StorageAdapter,
   waMediaId: string,
 ): Promise<boolean> {
   const record = await getMediaByWaId(db, waMediaId);
   if (!record) return false;
 
-  // Delete file (ignore if already gone)
-  try {
-    await unlink(record.storagePath);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
-  }
-
-  // Delete DB row
+  await storage.delete(record.storagePath);
   await db.delete(media).where(eq(media.waMediaId, waMediaId));
 
   return true;
-}
-
-export async function mediaFileExists(storagePath: string): Promise<boolean> {
-  try {
-    await stat(storagePath);
-    return true;
-  } catch {
-    return false;
-  }
 }

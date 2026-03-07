@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll, afterEach } from "vitest";
-import { mkdir, writeFile, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { testDb, testClient } from "../helpers/test-db";
@@ -9,15 +9,18 @@ import {
   getMediaByWaId,
   getMediaBuffer,
   deleteMedia,
-  getStoragePath,
+  storageKey,
 } from "../../services/media-storage";
+import { createFilesystemStorage } from "../../services/storage";
+import type { StorageAdapter } from "../../services/storage";
 
 let basePath: string;
+let storage: StorageAdapter;
 
-async function createTempDir(): Promise<string> {
+async function createTempStorage(): Promise<{ basePath: string; storage: StorageAdapter }> {
   const dir = join(tmpdir(), `media-test-${Date.now()}`);
   await mkdir(dir, { recursive: true });
-  return dir;
+  return { basePath: dir, storage: createFilesystemStorage(dir) };
 }
 
 afterAll(async () => {
@@ -32,12 +35,12 @@ afterEach(async () => {
 
 describe("media-storage", () => {
   describe("saveMedia", () => {
-    it("writes file to disk and inserts DB row", async () => {
-      basePath = await createTempDir();
+    it("writes file to storage and inserts DB row", async () => {
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const buffer = Buffer.from("fake-image-bytes");
 
-      const record = await saveMedia(testDb, basePath, {
+      const record = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId: `wa-img-${Date.now()}`,
         buffer,
@@ -50,19 +53,19 @@ describe("media-storage", () => {
       expect(record.fileSize).toBe(buffer.length);
       expect(record.originalFilename).toBe("photo.jpg");
 
-      // File exists on disk
-      const diskContent = await readFile(record.storagePath);
-      expect(diskContent).toEqual(buffer);
+      // File exists in storage
+      const stored = await getMediaBuffer(storage, record.storagePath);
+      expect(stored).toEqual(buffer);
     });
 
     it("links media to a message when messageId provided", async () => {
-      basePath = await createTempDir();
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const account = await seedWhatsAppAccount(tenant.id);
       const conv = await seedConversation(account.id);
       const msg = await seedMessage(conv.id);
 
-      const record = await saveMedia(testDb, basePath, {
+      const record = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId: `wa-linked-${Date.now()}`,
         messageId: msg.id,
@@ -74,19 +77,19 @@ describe("media-storage", () => {
     });
 
     it("is idempotent for duplicate waMediaId", async () => {
-      basePath = await createTempDir();
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const waMediaId = `wa-dup-${Date.now()}`;
       const buffer = Buffer.from("data");
 
-      const first = await saveMedia(testDb, basePath, {
+      const first = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId,
         buffer,
         mimeType: "image/png",
       });
 
-      const second = await saveMedia(testDb, basePath, {
+      const second = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId,
         buffer,
@@ -99,11 +102,11 @@ describe("media-storage", () => {
 
   describe("getMediaByWaId", () => {
     it("returns media record for existing waMediaId", async () => {
-      basePath = await createTempDir();
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const waMediaId = `wa-get-${Date.now()}`;
 
-      await saveMedia(testDb, basePath, {
+      await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId,
         buffer: Buffer.from("data"),
@@ -122,52 +125,59 @@ describe("media-storage", () => {
   });
 
   describe("getMediaBuffer", () => {
-    it("reads file contents from storage path", async () => {
-      basePath = await createTempDir();
+    it("reads file contents from storage", async () => {
+      ({ basePath, storage } = await createTempStorage());
       const content = Buffer.from("binary content");
-      const filePath = join(basePath, "test-file");
-      await writeFile(filePath, content);
+      await storage.put("test-key", content, "application/octet-stream");
 
-      const result = await getMediaBuffer(filePath);
+      const result = await getMediaBuffer(storage, "test-key");
       expect(result).toEqual(content);
+    });
+
+    it("returns null for missing key", async () => {
+      ({ basePath, storage } = await createTempStorage());
+      const result = await getMediaBuffer(storage, "nonexistent");
+      expect(result).toBeNull();
     });
   });
 
   describe("deleteMedia", () => {
-    it("removes file from disk and DB row", async () => {
-      basePath = await createTempDir();
+    it("removes file from storage and DB row", async () => {
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const waMediaId = `wa-del-${Date.now()}`;
 
-      const record = await saveMedia(testDb, basePath, {
+      const record = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId,
         buffer: Buffer.from("to-delete"),
         mimeType: "image/gif",
       });
 
-      const deleted = await deleteMedia(testDb, waMediaId);
+      const deleted = await deleteMedia(testDb, storage, waMediaId);
       expect(deleted).toBe(true);
 
       // DB row gone
       const found = await getMediaByWaId(testDb, waMediaId);
       expect(found).toBeNull();
 
-      // File gone
-      await expect(stat(record.storagePath)).rejects.toThrow();
+      // Storage gone
+      const exists = await storage.exists(record.storagePath);
+      expect(exists).toBe(false);
     });
 
     it("returns false for nonexistent media", async () => {
-      const deleted = await deleteMedia(testDb, "nonexistent-delete");
+      ({ basePath, storage } = await createTempStorage());
+      const deleted = await deleteMedia(testDb, storage, "nonexistent-delete");
       expect(deleted).toBe(false);
     });
 
-    it("succeeds even if file is already gone from disk", async () => {
-      basePath = await createTempDir();
+    it("succeeds even if file is already gone from storage", async () => {
+      ({ basePath, storage } = await createTempStorage());
       const tenant = await seedTenant();
       const waMediaId = `wa-gone-${Date.now()}`;
 
-      const record = await saveMedia(testDb, basePath, {
+      const record = await saveMedia(testDb, storage, {
         tenantId: tenant.id,
         waMediaId,
         buffer: Buffer.from("will-vanish"),
@@ -175,18 +185,18 @@ describe("media-storage", () => {
       });
 
       // Manually delete the file first
-      await rm(record.storagePath);
+      await storage.delete(record.storagePath);
 
       // deleteMedia should still succeed (cleans up DB)
-      const deleted = await deleteMedia(testDb, waMediaId);
+      const deleted = await deleteMedia(testDb, storage, waMediaId);
       expect(deleted).toBe(true);
     });
   });
 
-  describe("getStoragePath", () => {
-    it("returns flat path under base directory", async () => {
-      const path = getStoragePath("/data/media", "wa-media-123");
-      expect(path).toBe("/data/media/wa-media-123");
+  describe("storageKey", () => {
+    it("returns tenant-scoped key", () => {
+      const key = storageKey("tenant-123", "wa-media-456");
+      expect(key).toBe("tenant-123/wa-media-456");
     });
   });
 });

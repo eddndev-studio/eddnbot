@@ -29,11 +29,13 @@ import { adminApiKeyRoutes } from "./routes/admin/api-keys";
 import { adminOverviewRoutes } from "./routes/admin/overview";
 import { adminUsageRoutes } from "./routes/admin/usage";
 import { mediaRoutes } from "./routes/media";
+import { createFilesystemStorage, type StorageAdapter } from "./services/storage";
 
 declare module "fastify" {
   interface FastifyInstance {
     db: Database;
     env: Env;
+    storage: StorageAdapter;
     pendingAutoReplies: Promise<void>[];
   }
 }
@@ -50,6 +52,7 @@ export async function buildApp(env: Env) {
   app.decorate("env", env);
   const db = createDb(env.DATABASE_URL);
   app.decorate("db", db);
+  app.decorate("storage", createFilesystemStorage(env.MEDIA_STORAGE_PATH));
   app.decorate("pendingAutoReplies", [] as Promise<void>[]);
 
   // Error handler

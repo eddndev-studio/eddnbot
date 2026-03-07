@@ -13,7 +13,7 @@ import { createAiEngine, createWhisperAdapter } from "@eddnbot/ai";
 import type { AiProvider, AiEngineConfig, ThinkingConfig } from "@eddnbot/ai";
 import { handleInboundMessage, type ConversationHandlerDeps } from "../services/conversation-handler";
 import { trackAiTokens, trackWhatsAppMessage, checkQuota } from "../services/usage-tracker";
-import { saveMedia, resolveBasePath, getMediaByWaId, getMediaBuffer } from "../services/media-storage";
+import { saveMedia, getMediaByWaId, getMediaBuffer } from "../services/media-storage";
 
 export interface ProcessedInboundMessage {
   whatsappAccountId: string;
@@ -240,8 +240,6 @@ async function downloadPendingMedia(
   app: FastifyInstance,
   items: PendingMediaDownload[],
 ): Promise<void> {
-  const basePath = resolveBasePath(app.env as { MEDIA_STORAGE_PATH?: string });
-
   for (const item of items) {
     try {
       const client = createWhatsAppClient({
@@ -253,7 +251,7 @@ async function downloadPendingMedia(
       const mediaInfo = await client.getMediaUrl(item.waMediaId);
       const { buffer, mimeType } = await client.downloadMedia(mediaInfo.url);
 
-      await saveMedia(app.db, basePath, {
+      await saveMedia(app.db, app.storage, {
         tenantId: item.tenantId,
         waMediaId: item.waMediaId,
         messageId: item.messageId,
@@ -342,12 +340,9 @@ async function processAutoReplies(
           async getMediaBuffer(waMediaId: string) {
             const record = await getMediaByWaId(app.db, waMediaId);
             if (!record) return null;
-            try {
-              const buffer = await getMediaBuffer(record.storagePath);
-              return { buffer, mimeType: record.mimeType };
-            } catch {
-              return null;
-            }
+            const buffer = await getMediaBuffer(app.storage, record.storagePath);
+            if (!buffer) return null;
+            return { buffer, mimeType: record.mimeType };
           },
         },
       };

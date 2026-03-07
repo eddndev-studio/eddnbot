@@ -1,7 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { mkdir, writeFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { buildTestApp } from "../helpers/build-test-app";
 import { seedTenant } from "../helpers/seed";
@@ -9,7 +6,6 @@ import { testDb } from "../helpers/test-db";
 import { saveMedia } from "../../services/media-storage";
 
 let app: FastifyInstance;
-let basePath: string;
 const ADMIN_TOKEN = "test-admin-secret-that-is-at-least-32-chars-long";
 
 beforeAll(async () => {
@@ -21,26 +17,13 @@ afterAll(async () => {
   await app.close();
 });
 
-afterEach(async () => {
-  if (basePath) {
-    await rm(basePath, { recursive: true, force: true });
-  }
-});
-
-async function createTempMediaDir(): Promise<string> {
-  const dir = join(tmpdir(), `media-proxy-test-${Date.now()}`);
-  await mkdir(dir, { recursive: true });
-  return dir;
-}
-
 describe("GET /api/media/:mediaId", () => {
   it("returns stored media with correct Content-Type", async () => {
-    basePath = await createTempMediaDir();
     const tenant = await seedTenant();
     const content = Buffer.from("fake-jpeg-bytes");
     const waMediaId = `proxy-img-${Date.now()}`;
 
-    await saveMedia(testDb, basePath, {
+    await saveMedia(testDb, app.storage, {
       tenantId: tenant.id,
       waMediaId,
       buffer: content,
@@ -71,21 +54,19 @@ describe("GET /api/media/:mediaId", () => {
     expect(response.statusCode).toBe(404);
   });
 
-  it("returns 404 when file is missing from disk", async () => {
-    basePath = await createTempMediaDir();
+  it("returns 404 when file is missing from storage", async () => {
     const tenant = await seedTenant();
     const waMediaId = `proxy-gone-${Date.now()}`;
 
-    await saveMedia(testDb, basePath, {
+    const record = await saveMedia(testDb, app.storage, {
       tenantId: tenant.id,
       waMediaId,
       buffer: Buffer.from("will-be-deleted"),
       mimeType: "audio/ogg",
     });
 
-    // Delete the file manually
-    const filePath = join(basePath, waMediaId);
-    await rm(filePath);
+    // Delete the file manually from storage
+    await app.storage.delete(record.storagePath);
 
     const response = await app.inject({
       method: "GET",
@@ -117,11 +98,10 @@ describe("GET /api/media/:mediaId", () => {
   });
 
   it("serves media without filename when originalFilename is null", async () => {
-    basePath = await createTempMediaDir();
     const tenant = await seedTenant();
     const waMediaId = `proxy-noname-${Date.now()}`;
 
-    await saveMedia(testDb, basePath, {
+    await saveMedia(testDb, app.storage, {
       tenantId: tenant.id,
       waMediaId,
       buffer: Buffer.from("sticker-data"),

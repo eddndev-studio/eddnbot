@@ -8,526 +8,626 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as TermsRouteImport } from "./routes/terms"
-import { Route as PrivacyRouteImport } from "./routes/privacy"
-import { Route as LoginRouteImport } from "./routes/login"
-import { Route as DataDeletionRouteImport } from "./routes/data-deletion"
-import { Route as AuthRouteImport } from "./routes/_auth"
-import { Route as AuthIndexRouteImport } from "./routes/_auth/index"
-import { Route as AdminLoginRouteImport } from "./routes/admin/login"
-import { Route as AdminAdminRouteImport } from "./routes/admin/_admin"
-import { Route as AuthUsageRouteImport } from "./routes/_auth/usage"
-import { Route as AuthQuotasRouteImport } from "./routes/_auth/quotas"
-import { Route as AdminAdminIndexRouteImport } from "./routes/admin/_admin/index"
-import { Route as AuthWhatsappAccountsIndexRouteImport } from "./routes/_auth/whatsapp-accounts/index"
-import { Route as AuthConversationsIndexRouteImport } from "./routes/_auth/conversations/index"
-import { Route as AuthAiConfigsIndexRouteImport } from "./routes/_auth/ai-configs/index"
-import { Route as AdminAdminUsageRouteImport } from "./routes/admin/_admin/usage"
-import { Route as AuthWhatsappAccountsNewRouteImport } from "./routes/_auth/whatsapp-accounts/new"
-import { Route as AuthWhatsappAccountsAccountIdRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId"
-import { Route as AuthConversationsConversationIdRouteImport } from "./routes/_auth/conversations/$conversationId"
-import { Route as AuthAiConfigsNewRouteImport } from "./routes/_auth/ai-configs/new"
-import { Route as AuthAiConfigsConfigIdRouteImport } from "./routes/_auth/ai-configs/$configId"
-import { Route as AdminAdminTenantsIndexRouteImport } from "./routes/admin/_admin/tenants/index"
-import { Route as AuthWhatsappAccountsAccountIdIndexRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId/index"
-import { Route as AdminAdminTenantsNewRouteImport } from "./routes/admin/_admin/tenants/new"
-import { Route as AdminAdminTenantsTenantIdRouteImport } from "./routes/admin/_admin/tenants/$tenantId"
-import { Route as AuthWhatsappAccountsAccountIdTemplatesIndexRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId/templates/index"
-import { Route as AuthWhatsappAccountsAccountIdTemplatesNewRouteImport } from "./routes/_auth/whatsapp-accounts/$accountId/templates/new"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SelectTenantRouteImport } from './routes/select-tenant'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as DataDeletionRouteImport } from './routes/data-deletion'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as AuthIndexRouteImport } from './routes/_auth/index'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminAdminRouteImport } from './routes/admin/_admin'
+import { Route as AuthUsageRouteImport } from './routes/_auth/usage'
+import { Route as AuthQuotasRouteImport } from './routes/_auth/quotas'
+import { Route as AdminAdminIndexRouteImport } from './routes/admin/_admin/index'
+import { Route as AuthWhatsappAccountsIndexRouteImport } from './routes/_auth/whatsapp-accounts/index'
+import { Route as AuthConversationsIndexRouteImport } from './routes/_auth/conversations/index'
+import { Route as AuthAiConfigsIndexRouteImport } from './routes/_auth/ai-configs/index'
+import { Route as AdminAdminUsageRouteImport } from './routes/admin/_admin/usage'
+import { Route as AuthWhatsappAccountsNewRouteImport } from './routes/_auth/whatsapp-accounts/new'
+import { Route as AuthWhatsappAccountsAccountIdRouteImport } from './routes/_auth/whatsapp-accounts/$accountId'
+import { Route as AuthConversationsConversationIdRouteImport } from './routes/_auth/conversations/$conversationId'
+import { Route as AuthAiConfigsNewRouteImport } from './routes/_auth/ai-configs/new'
+import { Route as AuthAiConfigsConfigIdRouteImport } from './routes/_auth/ai-configs/$configId'
+import { Route as AdminAdminTenantsIndexRouteImport } from './routes/admin/_admin/tenants/index'
+import { Route as AuthWhatsappAccountsAccountIdIndexRouteImport } from './routes/_auth/whatsapp-accounts/$accountId/index'
+import { Route as AdminAdminTenantsNewRouteImport } from './routes/admin/_admin/tenants/new'
+import { Route as AdminAdminTenantsTenantIdRouteImport } from './routes/admin/_admin/tenants/$tenantId'
+import { Route as AuthWhatsappAccountsAccountIdTemplatesIndexRouteImport } from './routes/_auth/whatsapp-accounts/$accountId/templates/index'
+import { Route as AuthWhatsappAccountsAccountIdTemplatesNewRouteImport } from './routes/_auth/whatsapp-accounts/$accountId/templates/new'
 
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
-  id: "/terms",
-  path: "/terms",
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SelectTenantRoute = SelectTenantRouteImport.update({
+  id: '/select-tenant',
+  path: '/select-tenant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
-  id: "/privacy",
-  path: "/privacy",
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DataDeletionRoute = DataDeletionRouteImport.update({
-  id: "/data-deletion",
-  path: "/data-deletion",
+  id: '/data-deletion',
+  path: '/data-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
-  id: "/_auth",
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: "/admin/login",
-  path: "/admin/login",
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdminRoute = AdminAdminRouteImport.update({
-  id: "/admin/_admin",
-  path: "/admin",
+  id: '/admin/_admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthUsageRoute = AuthUsageRouteImport.update({
-  id: "/usage",
-  path: "/usage",
+  id: '/usage',
+  path: '/usage',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthQuotasRoute = AuthQuotasRouteImport.update({
-  id: "/quotas",
-  path: "/quotas",
+  id: '/quotas',
+  path: '/quotas',
   getParentRoute: () => AuthRoute,
 } as any)
 const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthWhatsappAccountsIndexRoute =
   AuthWhatsappAccountsIndexRouteImport.update({
-    id: "/whatsapp-accounts/",
-    path: "/whatsapp-accounts/",
+    id: '/whatsapp-accounts/',
+    path: '/whatsapp-accounts/',
     getParentRoute: () => AuthRoute,
   } as any)
 const AuthConversationsIndexRoute = AuthConversationsIndexRouteImport.update({
-  id: "/conversations/",
-  path: "/conversations/",
+  id: '/conversations/',
+  path: '/conversations/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthAiConfigsIndexRoute = AuthAiConfigsIndexRouteImport.update({
-  id: "/ai-configs/",
-  path: "/ai-configs/",
+  id: '/ai-configs/',
+  path: '/ai-configs/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AdminAdminUsageRoute = AdminAdminUsageRouteImport.update({
-  id: "/usage",
-  path: "/usage",
+  id: '/usage',
+  path: '/usage',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthWhatsappAccountsNewRoute = AuthWhatsappAccountsNewRouteImport.update({
-  id: "/whatsapp-accounts/new",
-  path: "/whatsapp-accounts/new",
+  id: '/whatsapp-accounts/new',
+  path: '/whatsapp-accounts/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthWhatsappAccountsAccountIdRoute =
   AuthWhatsappAccountsAccountIdRouteImport.update({
-    id: "/whatsapp-accounts/$accountId",
-    path: "/whatsapp-accounts/$accountId",
+    id: '/whatsapp-accounts/$accountId',
+    path: '/whatsapp-accounts/$accountId',
     getParentRoute: () => AuthRoute,
   } as any)
 const AuthConversationsConversationIdRoute =
   AuthConversationsConversationIdRouteImport.update({
-    id: "/conversations/$conversationId",
-    path: "/conversations/$conversationId",
+    id: '/conversations/$conversationId',
+    path: '/conversations/$conversationId',
     getParentRoute: () => AuthRoute,
   } as any)
 const AuthAiConfigsNewRoute = AuthAiConfigsNewRouteImport.update({
-  id: "/ai-configs/new",
-  path: "/ai-configs/new",
+  id: '/ai-configs/new',
+  path: '/ai-configs/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthAiConfigsConfigIdRoute = AuthAiConfigsConfigIdRouteImport.update({
-  id: "/ai-configs/$configId",
-  path: "/ai-configs/$configId",
+  id: '/ai-configs/$configId',
+  path: '/ai-configs/$configId',
   getParentRoute: () => AuthRoute,
 } as any)
 const AdminAdminTenantsIndexRoute = AdminAdminTenantsIndexRouteImport.update({
-  id: "/tenants/",
-  path: "/tenants/",
+  id: '/tenants/',
+  path: '/tenants/',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AuthWhatsappAccountsAccountIdIndexRoute =
   AuthWhatsappAccountsAccountIdIndexRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => AuthWhatsappAccountsAccountIdRoute,
   } as any)
 const AdminAdminTenantsNewRoute = AdminAdminTenantsNewRouteImport.update({
-  id: "/tenants/new",
-  path: "/tenants/new",
+  id: '/tenants/new',
+  path: '/tenants/new',
   getParentRoute: () => AdminAdminRoute,
 } as any)
 const AdminAdminTenantsTenantIdRoute =
   AdminAdminTenantsTenantIdRouteImport.update({
-    id: "/tenants/$tenantId",
-    path: "/tenants/$tenantId",
+    id: '/tenants/$tenantId',
+    path: '/tenants/$tenantId',
     getParentRoute: () => AdminAdminRoute,
   } as any)
 const AuthWhatsappAccountsAccountIdTemplatesIndexRoute =
   AuthWhatsappAccountsAccountIdTemplatesIndexRouteImport.update({
-    id: "/templates/",
-    path: "/templates/",
+    id: '/templates/',
+    path: '/templates/',
     getParentRoute: () => AuthWhatsappAccountsAccountIdRoute,
   } as any)
 const AuthWhatsappAccountsAccountIdTemplatesNewRoute =
   AuthWhatsappAccountsAccountIdTemplatesNewRouteImport.update({
-    id: "/templates/new",
-    path: "/templates/new",
+    id: '/templates/new',
+    path: '/templates/new',
     getParentRoute: () => AuthWhatsappAccountsAccountIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof AuthIndexRoute
-  "/data-deletion": typeof DataDeletionRoute
-  "/login": typeof LoginRoute
-  "/privacy": typeof PrivacyRoute
-  "/terms": typeof TermsRoute
-  "/quotas": typeof AuthQuotasRoute
-  "/usage": typeof AuthUsageRoute
-  "/admin": typeof AdminAdminRouteWithChildren
-  "/admin/login": typeof AdminLoginRoute
-  "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
-  "/ai-configs/new": typeof AuthAiConfigsNewRoute
-  "/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
-  "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRouteWithChildren
-  "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
-  "/admin/usage": typeof AdminAdminUsageRoute
-  "/ai-configs/": typeof AuthAiConfigsIndexRoute
-  "/conversations/": typeof AuthConversationsIndexRoute
-  "/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
-  "/admin/": typeof AdminAdminIndexRoute
-  "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
-  "/admin/tenants/new": typeof AdminAdminTenantsNewRoute
-  "/whatsapp-accounts/$accountId/": typeof AuthWhatsappAccountsAccountIdIndexRoute
-  "/admin/tenants/": typeof AdminAdminTenantsIndexRoute
-  "/whatsapp-accounts/$accountId/templates/new": typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
-  "/whatsapp-accounts/$accountId/templates/": typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
+  '/': typeof AuthIndexRoute
+  '/data-deletion': typeof DataDeletionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/select-tenant': typeof SelectTenantRoute
+  '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/quotas': typeof AuthQuotasRoute
+  '/usage': typeof AuthUsageRoute
+  '/admin': typeof AdminAdminRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/ai-configs/$configId': typeof AuthAiConfigsConfigIdRoute
+  '/ai-configs/new': typeof AuthAiConfigsNewRoute
+  '/conversations/$conversationId': typeof AuthConversationsConversationIdRoute
+  '/whatsapp-accounts/$accountId': typeof AuthWhatsappAccountsAccountIdRouteWithChildren
+  '/whatsapp-accounts/new': typeof AuthWhatsappAccountsNewRoute
+  '/admin/usage': typeof AdminAdminUsageRoute
+  '/ai-configs/': typeof AuthAiConfigsIndexRoute
+  '/conversations/': typeof AuthConversationsIndexRoute
+  '/whatsapp-accounts/': typeof AuthWhatsappAccountsIndexRoute
+  '/admin/': typeof AdminAdminIndexRoute
+  '/admin/tenants/$tenantId': typeof AdminAdminTenantsTenantIdRoute
+  '/admin/tenants/new': typeof AdminAdminTenantsNewRoute
+  '/whatsapp-accounts/$accountId/': typeof AuthWhatsappAccountsAccountIdIndexRoute
+  '/admin/tenants/': typeof AdminAdminTenantsIndexRoute
+  '/whatsapp-accounts/$accountId/templates/new': typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
+  '/whatsapp-accounts/$accountId/templates/': typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
-  "/data-deletion": typeof DataDeletionRoute
-  "/login": typeof LoginRoute
-  "/privacy": typeof PrivacyRoute
-  "/terms": typeof TermsRoute
-  "/quotas": typeof AuthQuotasRoute
-  "/usage": typeof AuthUsageRoute
-  "/admin/login": typeof AdminLoginRoute
-  "/": typeof AuthIndexRoute
-  "/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
-  "/ai-configs/new": typeof AuthAiConfigsNewRoute
-  "/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
-  "/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
-  "/admin/usage": typeof AdminAdminUsageRoute
-  "/ai-configs": typeof AuthAiConfigsIndexRoute
-  "/conversations": typeof AuthConversationsIndexRoute
-  "/whatsapp-accounts": typeof AuthWhatsappAccountsIndexRoute
-  "/admin": typeof AdminAdminIndexRoute
-  "/admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
-  "/admin/tenants/new": typeof AdminAdminTenantsNewRoute
-  "/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdIndexRoute
-  "/admin/tenants": typeof AdminAdminTenantsIndexRoute
-  "/whatsapp-accounts/$accountId/templates/new": typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
-  "/whatsapp-accounts/$accountId/templates": typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
+  '/data-deletion': typeof DataDeletionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/select-tenant': typeof SelectTenantRoute
+  '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/quotas': typeof AuthQuotasRoute
+  '/usage': typeof AuthUsageRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/': typeof AuthIndexRoute
+  '/ai-configs/$configId': typeof AuthAiConfigsConfigIdRoute
+  '/ai-configs/new': typeof AuthAiConfigsNewRoute
+  '/conversations/$conversationId': typeof AuthConversationsConversationIdRoute
+  '/whatsapp-accounts/new': typeof AuthWhatsappAccountsNewRoute
+  '/admin/usage': typeof AdminAdminUsageRoute
+  '/ai-configs': typeof AuthAiConfigsIndexRoute
+  '/conversations': typeof AuthConversationsIndexRoute
+  '/whatsapp-accounts': typeof AuthWhatsappAccountsIndexRoute
+  '/admin': typeof AdminAdminIndexRoute
+  '/admin/tenants/$tenantId': typeof AdminAdminTenantsTenantIdRoute
+  '/admin/tenants/new': typeof AdminAdminTenantsNewRoute
+  '/whatsapp-accounts/$accountId': typeof AuthWhatsappAccountsAccountIdIndexRoute
+  '/admin/tenants': typeof AdminAdminTenantsIndexRoute
+  '/whatsapp-accounts/$accountId/templates/new': typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
+  '/whatsapp-accounts/$accountId/templates': typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/_auth": typeof AuthRouteWithChildren
-  "/data-deletion": typeof DataDeletionRoute
-  "/login": typeof LoginRoute
-  "/privacy": typeof PrivacyRoute
-  "/terms": typeof TermsRoute
-  "/_auth/quotas": typeof AuthQuotasRoute
-  "/_auth/usage": typeof AuthUsageRoute
-  "/admin/_admin": typeof AdminAdminRouteWithChildren
-  "/admin/login": typeof AdminLoginRoute
-  "/_auth/": typeof AuthIndexRoute
-  "/_auth/ai-configs/$configId": typeof AuthAiConfigsConfigIdRoute
-  "/_auth/ai-configs/new": typeof AuthAiConfigsNewRoute
-  "/_auth/conversations/$conversationId": typeof AuthConversationsConversationIdRoute
-  "/_auth/whatsapp-accounts/$accountId": typeof AuthWhatsappAccountsAccountIdRouteWithChildren
-  "/_auth/whatsapp-accounts/new": typeof AuthWhatsappAccountsNewRoute
-  "/admin/_admin/usage": typeof AdminAdminUsageRoute
-  "/_auth/ai-configs/": typeof AuthAiConfigsIndexRoute
-  "/_auth/conversations/": typeof AuthConversationsIndexRoute
-  "/_auth/whatsapp-accounts/": typeof AuthWhatsappAccountsIndexRoute
-  "/admin/_admin/": typeof AdminAdminIndexRoute
-  "/admin/_admin/tenants/$tenantId": typeof AdminAdminTenantsTenantIdRoute
-  "/admin/_admin/tenants/new": typeof AdminAdminTenantsNewRoute
-  "/_auth/whatsapp-accounts/$accountId/": typeof AuthWhatsappAccountsAccountIdIndexRoute
-  "/admin/_admin/tenants/": typeof AdminAdminTenantsIndexRoute
-  "/_auth/whatsapp-accounts/$accountId/templates/new": typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
-  "/_auth/whatsapp-accounts/$accountId/templates/": typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/data-deletion': typeof DataDeletionRoute
+  '/forgot-password': typeof ForgotPasswordRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/select-tenant': typeof SelectTenantRoute
+  '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/_auth/quotas': typeof AuthQuotasRoute
+  '/_auth/usage': typeof AuthUsageRoute
+  '/admin/_admin': typeof AdminAdminRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
+  '/_auth/': typeof AuthIndexRoute
+  '/_auth/ai-configs/$configId': typeof AuthAiConfigsConfigIdRoute
+  '/_auth/ai-configs/new': typeof AuthAiConfigsNewRoute
+  '/_auth/conversations/$conversationId': typeof AuthConversationsConversationIdRoute
+  '/_auth/whatsapp-accounts/$accountId': typeof AuthWhatsappAccountsAccountIdRouteWithChildren
+  '/_auth/whatsapp-accounts/new': typeof AuthWhatsappAccountsNewRoute
+  '/admin/_admin/usage': typeof AdminAdminUsageRoute
+  '/_auth/ai-configs/': typeof AuthAiConfigsIndexRoute
+  '/_auth/conversations/': typeof AuthConversationsIndexRoute
+  '/_auth/whatsapp-accounts/': typeof AuthWhatsappAccountsIndexRoute
+  '/admin/_admin/': typeof AdminAdminIndexRoute
+  '/admin/_admin/tenants/$tenantId': typeof AdminAdminTenantsTenantIdRoute
+  '/admin/_admin/tenants/new': typeof AdminAdminTenantsNewRoute
+  '/_auth/whatsapp-accounts/$accountId/': typeof AuthWhatsappAccountsAccountIdIndexRoute
+  '/admin/_admin/tenants/': typeof AdminAdminTenantsIndexRoute
+  '/_auth/whatsapp-accounts/$accountId/templates/new': typeof AuthWhatsappAccountsAccountIdTemplatesNewRoute
+  '/_auth/whatsapp-accounts/$accountId/templates/': typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/data-deletion"
-    | "/login"
-    | "/privacy"
-    | "/terms"
-    | "/quotas"
-    | "/usage"
-    | "/admin"
-    | "/admin/login"
-    | "/ai-configs/$configId"
-    | "/ai-configs/new"
-    | "/conversations/$conversationId"
-    | "/whatsapp-accounts/$accountId"
-    | "/whatsapp-accounts/new"
-    | "/admin/usage"
-    | "/ai-configs/"
-    | "/conversations/"
-    | "/whatsapp-accounts/"
-    | "/admin/"
-    | "/admin/tenants/$tenantId"
-    | "/admin/tenants/new"
-    | "/whatsapp-accounts/$accountId/"
-    | "/admin/tenants/"
-    | "/whatsapp-accounts/$accountId/templates/new"
-    | "/whatsapp-accounts/$accountId/templates/"
+    | '/'
+    | '/data-deletion'
+    | '/forgot-password'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/reset-password'
+    | '/select-tenant'
+    | '/terms'
+    | '/verify-email'
+    | '/quotas'
+    | '/usage'
+    | '/admin'
+    | '/admin/login'
+    | '/ai-configs/$configId'
+    | '/ai-configs/new'
+    | '/conversations/$conversationId'
+    | '/whatsapp-accounts/$accountId'
+    | '/whatsapp-accounts/new'
+    | '/admin/usage'
+    | '/ai-configs/'
+    | '/conversations/'
+    | '/whatsapp-accounts/'
+    | '/admin/'
+    | '/admin/tenants/$tenantId'
+    | '/admin/tenants/new'
+    | '/whatsapp-accounts/$accountId/'
+    | '/admin/tenants/'
+    | '/whatsapp-accounts/$accountId/templates/new'
+    | '/whatsapp-accounts/$accountId/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | "/data-deletion"
-    | "/login"
-    | "/privacy"
-    | "/terms"
-    | "/quotas"
-    | "/usage"
-    | "/admin/login"
-    | "/"
-    | "/ai-configs/$configId"
-    | "/ai-configs/new"
-    | "/conversations/$conversationId"
-    | "/whatsapp-accounts/new"
-    | "/admin/usage"
-    | "/ai-configs"
-    | "/conversations"
-    | "/whatsapp-accounts"
-    | "/admin"
-    | "/admin/tenants/$tenantId"
-    | "/admin/tenants/new"
-    | "/whatsapp-accounts/$accountId"
-    | "/admin/tenants"
-    | "/whatsapp-accounts/$accountId/templates/new"
-    | "/whatsapp-accounts/$accountId/templates"
+    | '/data-deletion'
+    | '/forgot-password'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/reset-password'
+    | '/select-tenant'
+    | '/terms'
+    | '/verify-email'
+    | '/quotas'
+    | '/usage'
+    | '/admin/login'
+    | '/'
+    | '/ai-configs/$configId'
+    | '/ai-configs/new'
+    | '/conversations/$conversationId'
+    | '/whatsapp-accounts/new'
+    | '/admin/usage'
+    | '/ai-configs'
+    | '/conversations'
+    | '/whatsapp-accounts'
+    | '/admin'
+    | '/admin/tenants/$tenantId'
+    | '/admin/tenants/new'
+    | '/whatsapp-accounts/$accountId'
+    | '/admin/tenants'
+    | '/whatsapp-accounts/$accountId/templates/new'
+    | '/whatsapp-accounts/$accountId/templates'
   id:
-    | "__root__"
-    | "/_auth"
-    | "/data-deletion"
-    | "/login"
-    | "/privacy"
-    | "/terms"
-    | "/_auth/quotas"
-    | "/_auth/usage"
-    | "/admin/_admin"
-    | "/admin/login"
-    | "/_auth/"
-    | "/_auth/ai-configs/$configId"
-    | "/_auth/ai-configs/new"
-    | "/_auth/conversations/$conversationId"
-    | "/_auth/whatsapp-accounts/$accountId"
-    | "/_auth/whatsapp-accounts/new"
-    | "/admin/_admin/usage"
-    | "/_auth/ai-configs/"
-    | "/_auth/conversations/"
-    | "/_auth/whatsapp-accounts/"
-    | "/admin/_admin/"
-    | "/admin/_admin/tenants/$tenantId"
-    | "/admin/_admin/tenants/new"
-    | "/_auth/whatsapp-accounts/$accountId/"
-    | "/admin/_admin/tenants/"
-    | "/_auth/whatsapp-accounts/$accountId/templates/new"
-    | "/_auth/whatsapp-accounts/$accountId/templates/"
+    | '__root__'
+    | '/_auth'
+    | '/data-deletion'
+    | '/forgot-password'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/reset-password'
+    | '/select-tenant'
+    | '/terms'
+    | '/verify-email'
+    | '/_auth/quotas'
+    | '/_auth/usage'
+    | '/admin/_admin'
+    | '/admin/login'
+    | '/_auth/'
+    | '/_auth/ai-configs/$configId'
+    | '/_auth/ai-configs/new'
+    | '/_auth/conversations/$conversationId'
+    | '/_auth/whatsapp-accounts/$accountId'
+    | '/_auth/whatsapp-accounts/new'
+    | '/admin/_admin/usage'
+    | '/_auth/ai-configs/'
+    | '/_auth/conversations/'
+    | '/_auth/whatsapp-accounts/'
+    | '/admin/_admin/'
+    | '/admin/_admin/tenants/$tenantId'
+    | '/admin/_admin/tenants/new'
+    | '/_auth/whatsapp-accounts/$accountId/'
+    | '/admin/_admin/tenants/'
+    | '/_auth/whatsapp-accounts/$accountId/templates/new'
+    | '/_auth/whatsapp-accounts/$accountId/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   DataDeletionRoute: typeof DataDeletionRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
+  RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SelectTenantRoute: typeof SelectTenantRoute
   TermsRoute: typeof TermsRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   AdminAdminRoute: typeof AdminAdminRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/terms": {
-      id: "/terms"
-      path: "/terms"
-      fullPath: "/terms"
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/privacy": {
-      id: "/privacy"
-      path: "/privacy"
-      fullPath: "/privacy"
+    '/select-tenant': {
+      id: '/select-tenant'
+      path: '/select-tenant'
+      fullPath: '/select-tenant'
+      preLoaderRoute: typeof SelectTenantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/login": {
-      id: "/login"
-      path: "/login"
-      fullPath: "/login"
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/data-deletion": {
-      id: "/data-deletion"
-      path: "/data-deletion"
-      fullPath: "/data-deletion"
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-deletion': {
+      id: '/data-deletion'
+      path: '/data-deletion'
+      fullPath: '/data-deletion'
       preLoaderRoute: typeof DataDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth": {
-      id: "/_auth"
-      path: ""
-      fullPath: "/"
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth/": {
-      id: "/_auth/"
-      path: "/"
-      fullPath: "/"
+    '/_auth/': {
+      id: '/_auth/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/admin/login": {
-      id: "/admin/login"
-      path: "/admin/login"
-      fullPath: "/admin/login"
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/admin/_admin": {
-      id: "/admin/_admin"
-      path: "/admin"
-      fullPath: "/admin"
+    '/admin/_admin': {
+      id: '/admin/_admin'
+      path: '/admin'
+      fullPath: '/admin'
       preLoaderRoute: typeof AdminAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth/usage": {
-      id: "/_auth/usage"
-      path: "/usage"
-      fullPath: "/usage"
+    '/_auth/usage': {
+      id: '/_auth/usage'
+      path: '/usage'
+      fullPath: '/usage'
       preLoaderRoute: typeof AuthUsageRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/quotas": {
-      id: "/_auth/quotas"
-      path: "/quotas"
-      fullPath: "/quotas"
+    '/_auth/quotas': {
+      id: '/_auth/quotas'
+      path: '/quotas'
+      fullPath: '/quotas'
       preLoaderRoute: typeof AuthQuotasRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/admin/_admin/": {
-      id: "/admin/_admin/"
-      path: "/"
-      fullPath: "/admin/"
+    '/admin/_admin/': {
+      id: '/admin/_admin/'
+      path: '/'
+      fullPath: '/admin/'
       preLoaderRoute: typeof AdminAdminIndexRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    "/_auth/whatsapp-accounts/": {
-      id: "/_auth/whatsapp-accounts/"
-      path: "/whatsapp-accounts"
-      fullPath: "/whatsapp-accounts/"
+    '/_auth/whatsapp-accounts/': {
+      id: '/_auth/whatsapp-accounts/'
+      path: '/whatsapp-accounts'
+      fullPath: '/whatsapp-accounts/'
       preLoaderRoute: typeof AuthWhatsappAccountsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/conversations/": {
-      id: "/_auth/conversations/"
-      path: "/conversations"
-      fullPath: "/conversations/"
+    '/_auth/conversations/': {
+      id: '/_auth/conversations/'
+      path: '/conversations'
+      fullPath: '/conversations/'
       preLoaderRoute: typeof AuthConversationsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/ai-configs/": {
-      id: "/_auth/ai-configs/"
-      path: "/ai-configs"
-      fullPath: "/ai-configs/"
+    '/_auth/ai-configs/': {
+      id: '/_auth/ai-configs/'
+      path: '/ai-configs'
+      fullPath: '/ai-configs/'
       preLoaderRoute: typeof AuthAiConfigsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/admin/_admin/usage": {
-      id: "/admin/_admin/usage"
-      path: "/usage"
-      fullPath: "/admin/usage"
+    '/admin/_admin/usage': {
+      id: '/admin/_admin/usage'
+      path: '/usage'
+      fullPath: '/admin/usage'
       preLoaderRoute: typeof AdminAdminUsageRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    "/_auth/whatsapp-accounts/new": {
-      id: "/_auth/whatsapp-accounts/new"
-      path: "/whatsapp-accounts/new"
-      fullPath: "/whatsapp-accounts/new"
+    '/_auth/whatsapp-accounts/new': {
+      id: '/_auth/whatsapp-accounts/new'
+      path: '/whatsapp-accounts/new'
+      fullPath: '/whatsapp-accounts/new'
       preLoaderRoute: typeof AuthWhatsappAccountsNewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/whatsapp-accounts/$accountId": {
-      id: "/_auth/whatsapp-accounts/$accountId"
-      path: "/whatsapp-accounts/$accountId"
-      fullPath: "/whatsapp-accounts/$accountId"
+    '/_auth/whatsapp-accounts/$accountId': {
+      id: '/_auth/whatsapp-accounts/$accountId'
+      path: '/whatsapp-accounts/$accountId'
+      fullPath: '/whatsapp-accounts/$accountId'
       preLoaderRoute: typeof AuthWhatsappAccountsAccountIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/conversations/$conversationId": {
-      id: "/_auth/conversations/$conversationId"
-      path: "/conversations/$conversationId"
-      fullPath: "/conversations/$conversationId"
+    '/_auth/conversations/$conversationId': {
+      id: '/_auth/conversations/$conversationId'
+      path: '/conversations/$conversationId'
+      fullPath: '/conversations/$conversationId'
       preLoaderRoute: typeof AuthConversationsConversationIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/ai-configs/new": {
-      id: "/_auth/ai-configs/new"
-      path: "/ai-configs/new"
-      fullPath: "/ai-configs/new"
+    '/_auth/ai-configs/new': {
+      id: '/_auth/ai-configs/new'
+      path: '/ai-configs/new'
+      fullPath: '/ai-configs/new'
       preLoaderRoute: typeof AuthAiConfigsNewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/ai-configs/$configId": {
-      id: "/_auth/ai-configs/$configId"
-      path: "/ai-configs/$configId"
-      fullPath: "/ai-configs/$configId"
+    '/_auth/ai-configs/$configId': {
+      id: '/_auth/ai-configs/$configId'
+      path: '/ai-configs/$configId'
+      fullPath: '/ai-configs/$configId'
       preLoaderRoute: typeof AuthAiConfigsConfigIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/admin/_admin/tenants/": {
-      id: "/admin/_admin/tenants/"
-      path: "/tenants"
-      fullPath: "/admin/tenants/"
+    '/admin/_admin/tenants/': {
+      id: '/admin/_admin/tenants/'
+      path: '/tenants'
+      fullPath: '/admin/tenants/'
       preLoaderRoute: typeof AdminAdminTenantsIndexRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    "/_auth/whatsapp-accounts/$accountId/": {
-      id: "/_auth/whatsapp-accounts/$accountId/"
-      path: "/"
-      fullPath: "/whatsapp-accounts/$accountId/"
+    '/_auth/whatsapp-accounts/$accountId/': {
+      id: '/_auth/whatsapp-accounts/$accountId/'
+      path: '/'
+      fullPath: '/whatsapp-accounts/$accountId/'
       preLoaderRoute: typeof AuthWhatsappAccountsAccountIdIndexRouteImport
       parentRoute: typeof AuthWhatsappAccountsAccountIdRoute
     }
-    "/admin/_admin/tenants/new": {
-      id: "/admin/_admin/tenants/new"
-      path: "/tenants/new"
-      fullPath: "/admin/tenants/new"
+    '/admin/_admin/tenants/new': {
+      id: '/admin/_admin/tenants/new'
+      path: '/tenants/new'
+      fullPath: '/admin/tenants/new'
       preLoaderRoute: typeof AdminAdminTenantsNewRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    "/admin/_admin/tenants/$tenantId": {
-      id: "/admin/_admin/tenants/$tenantId"
-      path: "/tenants/$tenantId"
-      fullPath: "/admin/tenants/$tenantId"
+    '/admin/_admin/tenants/$tenantId': {
+      id: '/admin/_admin/tenants/$tenantId'
+      path: '/tenants/$tenantId'
+      fullPath: '/admin/tenants/$tenantId'
       preLoaderRoute: typeof AdminAdminTenantsTenantIdRouteImport
       parentRoute: typeof AdminAdminRoute
     }
-    "/_auth/whatsapp-accounts/$accountId/templates/": {
-      id: "/_auth/whatsapp-accounts/$accountId/templates/"
-      path: "/templates"
-      fullPath: "/whatsapp-accounts/$accountId/templates/"
+    '/_auth/whatsapp-accounts/$accountId/templates/': {
+      id: '/_auth/whatsapp-accounts/$accountId/templates/'
+      path: '/templates'
+      fullPath: '/whatsapp-accounts/$accountId/templates/'
       preLoaderRoute: typeof AuthWhatsappAccountsAccountIdTemplatesIndexRouteImport
       parentRoute: typeof AuthWhatsappAccountsAccountIdRoute
     }
-    "/_auth/whatsapp-accounts/$accountId/templates/new": {
-      id: "/_auth/whatsapp-accounts/$accountId/templates/new"
-      path: "/templates/new"
-      fullPath: "/whatsapp-accounts/$accountId/templates/new"
+    '/_auth/whatsapp-accounts/$accountId/templates/new': {
+      id: '/_auth/whatsapp-accounts/$accountId/templates/new'
+      path: '/templates/new'
+      fullPath: '/whatsapp-accounts/$accountId/templates/new'
       preLoaderRoute: typeof AuthWhatsappAccountsAccountIdTemplatesNewRouteImport
       parentRoute: typeof AuthWhatsappAccountsAccountIdRoute
     }
@@ -609,9 +709,14 @@ const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   DataDeletionRoute: DataDeletionRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
+  RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SelectTenantRoute: SelectTenantRoute,
   TermsRoute: TermsRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   AdminAdminRoute: AdminAdminRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
 }

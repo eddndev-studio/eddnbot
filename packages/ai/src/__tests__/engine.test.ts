@@ -7,18 +7,21 @@ describe("createAiEngine", () => {
     const engine = createAiEngine({ provider: "openai" });
     expect(engine).toBeDefined();
     expect(engine.chat).toBeTypeOf("function");
+    expect(engine.chatStream).toBeTypeOf("function");
   });
 
   it("returns an adapter for anthropic", () => {
     const engine = createAiEngine({ provider: "anthropic" });
     expect(engine).toBeDefined();
     expect(engine.chat).toBeTypeOf("function");
+    expect(engine.chatStream).toBeTypeOf("function");
   });
 
   it("returns an adapter for gemini", () => {
     const engine = createAiEngine({ provider: "gemini" });
     expect(engine).toBeDefined();
     expect(engine.chat).toBeTypeOf("function");
+    expect(engine.chatStream).toBeTypeOf("function");
   });
 
   it("throws AiProviderNotFoundError for unknown provider", () => {

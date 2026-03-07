@@ -48,19 +48,29 @@ export interface AiEngineConfig {
   thinking?: ThinkingConfig;
 }
 
+export interface AiUsage {
+  inputTokens?: number;
+  outputTokens?: number;
+  cachedInputTokens?: number;
+}
+
 export interface AiResponse {
   content: string;
   thinkingContent?: string;
-  usage?: {
-    inputTokens?: number;
-    outputTokens?: number;
-    cachedInputTokens?: number;
-  };
+  usage?: AiUsage;
+  finishReason?: string;
+}
+
+export interface AiStreamChunk {
+  type: "text" | "thinking" | "usage" | "done";
+  content?: string;
+  usage?: AiUsage;
   finishReason?: string;
 }
 
 export interface AiProviderAdapter {
   chat(messages: ChatMessage[], config: AiEngineConfig): Promise<AiResponse>;
+  chatStream(messages: ChatMessage[], config: AiEngineConfig): AsyncGenerator<AiStreamChunk>;
 }
 
 /** Extract text from content, whether string or ContentPart[]. */

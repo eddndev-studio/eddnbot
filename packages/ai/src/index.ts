@@ -4,6 +4,8 @@ export type {
   AiProviderAdapter,
   AiEngineConfig,
   AiResponse,
+  AiStreamChunk,
+  AiUsage,
   ChatMessage,
   MessageRole,
   ThinkingConfig,

@@ -19,3 +19,10 @@ export type {
 } from "./transcription-types";
 export { createWhisperAdapter } from "./providers/whisper";
 export { AiEngineError, AiProviderNotFoundError } from "./errors";
+export {
+  MODEL_REGISTRY,
+  getModelsByProvider,
+  getModelById,
+  type ModelDefinition,
+  type ModelCapabilities,
+} from "./model-registry";

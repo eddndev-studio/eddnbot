@@ -16,7 +16,8 @@ export interface AnthropicThinkingConfig {
 }
 
 export interface GeminiThinkingConfig {
-  thinkingBudget: number;
+  thinkingBudget?: number;
+  thinkingLevel?: string;
 }
 
 export type ThinkingConfig =

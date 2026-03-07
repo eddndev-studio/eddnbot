@@ -11,7 +11,7 @@ export interface GeminiClient {
         systemInstruction?: string;
         temperature?: number;
         maxOutputTokens?: number;
-        thinkingConfig?: { thinkingBudget: number };
+        thinkingConfig?: { thinkingBudget?: number; thinkingLevel?: string };
       };
     }): Promise<{
       text?: string;
@@ -46,9 +46,11 @@ export function createGeminiAdapter(client?: GeminiClient): AiProviderAdapter {
             systemInstruction: config.systemPrompt,
             temperature: config.temperature,
             maxOutputTokens: config.maxOutputTokens,
-            ...(thinkingConfig && thinkingConfig.thinkingBudget > 0
-              ? { thinkingConfig: { thinkingBudget: thinkingConfig.thinkingBudget } }
-              : {}),
+            ...(thinkingConfig?.thinkingLevel
+              ? { thinkingConfig: { thinkingLevel: thinkingConfig.thinkingLevel } }
+              : thinkingConfig?.thinkingBudget && thinkingConfig.thinkingBudget > 0
+                ? { thinkingConfig: { thinkingBudget: thinkingConfig.thinkingBudget } }
+                : {}),
           },
         });
 

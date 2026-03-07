@@ -13,6 +13,7 @@ const envSchema = z.object({
   WHATSAPP_VERIFY_TOKEN: z.string().optional(),
   WHATSAPP_API_VERSION: z.string().default("v21.0"),
   ADMIN_SECRET: z.string().min(32),
+  MEDIA_STORAGE_PATH: z.string().default("/data/media"),
 });
 
 export type Env = z.infer<typeof envSchema>;

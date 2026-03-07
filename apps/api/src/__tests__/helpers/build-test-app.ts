@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { buildApp } from "../../app";
 import type { Env } from "../../env";
 
@@ -14,6 +16,7 @@ const testEnv: Env = {
   WHATSAPP_VERIFY_TOKEN: "test-whatsapp-verify-token",
   WHATSAPP_API_VERSION: "v21.0",
   ADMIN_SECRET: "test-admin-secret-that-is-at-least-32-chars-long",
+  MEDIA_STORAGE_PATH: join(tmpdir(), "eddnbot-test-media"),
 };
 
 export function buildTestApp() {

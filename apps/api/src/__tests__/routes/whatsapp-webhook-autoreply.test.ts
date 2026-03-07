@@ -332,34 +332,37 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
       autoReplyEnabled: true,
     });
 
-    // Mock fetch: first call for getMediaUrl, second for downloadMedia, then for sendMessage/markAsRead
+    // Mock fetch:
+    //   1-2: downloadPendingMedia (getMediaUrl + downloadMedia for storage)
+    //   3-4: conversation handler (getMediaUrl + downloadMedia for Whisper)
+    //   5+:  sendMessage / markAsRead
+    const mediaUrlResponse = {
+      ok: true, status: 200,
+      json: async () => ({
+        url: "https://lookaside.fbsbx.com/media/audio.ogg",
+        mime_type: "audio/ogg", sha256: "abc", file_size: 1000, id: "media-audio-ar",
+      }),
+    } as Response;
+    const mediaDownloadResponse = {
+      ok: true, status: 200,
+      arrayBuffer: async () => new ArrayBuffer(100),
+      headers: { get: () => "audio/ogg" },
+    } as unknown as Response;
+    const whatsappApiResponse = {
+      ok: true, status: 200,
+      json: async () => ({
+        messaging_product: "whatsapp",
+        contacts: [{ input: "5491100606060", wa_id: "5491100606060" }],
+        messages: [{ id: "wamid.audio-reply" }],
+      }),
+    } as Response;
+
     const fetchSpy = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          url: "https://lookaside.fbsbx.com/media/audio.ogg",
-          mime_type: "audio/ogg",
-          sha256: "abc",
-          file_size: 1000,
-          id: "media-audio-ar",
-        }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => new ArrayBuffer(100),
-        headers: { get: () => "audio/ogg" },
-      } as unknown as Response)
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          messaging_product: "whatsapp",
-          contacts: [{ input: "5491100606060", wa_id: "5491100606060" }],
-          messages: [{ id: "wamid.audio-reply" }],
-        }),
-      } as Response);
+      .mockResolvedValueOnce(mediaUrlResponse)
+      .mockResolvedValueOnce(mediaDownloadResponse)
+      .mockResolvedValueOnce(mediaUrlResponse)
+      .mockResolvedValueOnce(mediaDownloadResponse)
+      .mockResolvedValue(whatsappApiResponse);
 
     const payload = makeWebhookPayload(account.phoneNumberId, {
       from: "5491100606060",
@@ -399,7 +402,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
     fetchSpy.mockRestore();
   });
 
-  it("skips auto-reply for image messages", async () => {
+  it("skips auto-reply for image messages (but downloads media)", async () => {
     const tenant = await seedTenant();
     const config = await seedAiConfig(tenant.id, { provider: "openai", model: "gpt-4o" });
     const account = await seedWhatsAppAccount(tenant.id, {
@@ -407,6 +410,21 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
       aiConfigId: config.id,
       autoReplyEnabled: true,
     });
+
+    // Mock fetch for media download (downloadPendingMedia)
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true, status: 200,
+        json: async () => ({
+          url: "https://lookaside.fbsbx.com/media/photo.jpg",
+          mime_type: "image/jpeg", sha256: "abc", file_size: 5000, id: "img-123",
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true, status: 200,
+        arrayBuffer: async () => new ArrayBuffer(5000),
+        headers: { get: () => "image/jpeg" },
+      } as unknown as Response);
 
     const payload = makeWebhookPayload(account.phoneNumberId, {
       from: "5491100707070",
@@ -441,6 +459,8 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
     // Only inbound message, no outbound
     expect(msgs).toHaveLength(1);
     expect(msgs[0].direction).toBe("inbound");
+
+    fetchSpy.mockRestore();
   });
 
   it("handles duplicate messages (no double auto-reply)", async () => {

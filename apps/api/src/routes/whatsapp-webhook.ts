@@ -13,6 +13,7 @@ import { createAiEngine, createWhisperAdapter } from "@eddnbot/ai";
 import type { AiProvider, AiEngineConfig, ThinkingConfig } from "@eddnbot/ai";
 import { handleInboundMessage, type ConversationHandlerDeps } from "../services/conversation-handler";
 import { trackAiTokens, trackWhatsAppMessage, checkQuota } from "../services/usage-tracker";
+import { saveMedia, resolveBasePath } from "../services/media-storage";
 
 export interface ProcessedInboundMessage {
   whatsappAccountId: string;
@@ -22,6 +23,18 @@ export interface ProcessedInboundMessage {
   contactPhone: string;
   waMessageId: string;
 }
+
+export interface PendingMediaDownload {
+  tenantId: string;
+  messageId: string;
+  waMediaId: string;
+  mimeType: string;
+  originalFilename?: string;
+  accessToken: string;
+  phoneNumberId: string;
+}
+
+const MEDIA_FIELDS = ["image", "audio", "video", "document", "sticker"] as const;
 
 const API_KEY_MAP: Record<AiProvider, "OPENAI_API_KEY" | "ANTHROPIC_API_KEY" | "GOOGLE_GEMINI_API_KEY"> = {
   openai: "OPENAI_API_KEY",
@@ -79,19 +92,26 @@ export async function whatsappWebhookRoutes(app: FastifyInstance) {
       const events = parseWebhookPayload(payload);
 
       // Process each event synchronously (before returning 200)
-      const allProcessed: ProcessedInboundMessage[] = [];
+      const allProcessed: { messages: ProcessedInboundMessage[]; mediaItems: PendingMediaDownload[] } = {
+        messages: [],
+        mediaItems: [],
+      };
       for (const event of events) {
-        const processed = await processEvent(app, event);
-        allProcessed.push(...processed);
+        const result = await processEvent(app, event);
+        allProcessed.messages.push(...result.messages);
+        allProcessed.mediaItems.push(...result.mediaItems);
       }
 
       // Return 200 immediately to Meta
       reply.code(200).send({ status: "ok" });
 
-      // Fire-and-forget auto-replies
-      if (allProcessed.length > 0) {
-        const p = processAutoReplies(app, allProcessed).catch((err) => {
-          app.log.error({ err }, "Auto-reply processing failed");
+      // Fire-and-forget: download media then process auto-replies
+      if (allProcessed.messages.length > 0 || allProcessed.mediaItems.length > 0) {
+        const p = (async () => {
+          await downloadPendingMedia(app, allProcessed.mediaItems);
+          await processAutoReplies(app, allProcessed.messages);
+        })().catch((err) => {
+          app.log.error({ err }, "Post-webhook processing failed");
         });
         app.pendingAutoReplies.push(p as Promise<void>);
       }
@@ -99,11 +119,16 @@ export async function whatsappWebhookRoutes(app: FastifyInstance) {
   );
 }
 
+interface ProcessEventResult {
+  messages: ProcessedInboundMessage[];
+  mediaItems: PendingMediaDownload[];
+}
+
 async function processEvent(
   app: FastifyInstance,
   event: ParsedWebhookEvent,
-): Promise<ProcessedInboundMessage[]> {
-  const processed: ProcessedInboundMessage[] = [];
+): Promise<ProcessEventResult> {
+  const result: ProcessEventResult = { messages: [], mediaItems: [] };
 
   // Find the whatsapp account for this phone number
   const [account] = await app.db
@@ -111,7 +136,7 @@ async function processEvent(
     .from(whatsappAccounts)
     .where(eq(whatsappAccounts.phoneNumberId, event.phoneNumberId));
 
-  if (!account) return processed; // Unknown phone number, skip
+  if (!account) return result; // Unknown phone number, skip
 
   // Handle inbound messages
   for (const msg of event.messages) {
@@ -157,16 +182,16 @@ async function processEvent(
     if (msg.button) content.button = msg.button;
     if (msg.sticker) content.sticker = msg.sticker;
 
-    await app.db.insert(messages).values({
+    const [insertedMsg] = await app.db.insert(messages).values({
       conversationId: conv.id,
       waMessageId: msg.id,
       direction: "inbound",
       type: msg.type,
       content,
       status: "received",
-    });
+    }).returning({ id: messages.id });
 
-    processed.push({
+    result.messages.push({
       whatsappAccountId: account.id,
       conversationId: conv.id,
       messageType: msg.type,
@@ -174,6 +199,22 @@ async function processEvent(
       contactPhone: msg.from,
       waMessageId: msg.id,
     });
+
+    // Collect media items for async download
+    for (const field of MEDIA_FIELDS) {
+      const mediaData = content[field] as { id?: string; mime_type?: string; filename?: string } | undefined;
+      if (mediaData?.id) {
+        result.mediaItems.push({
+          tenantId: account.tenantId,
+          messageId: insertedMsg.id,
+          waMediaId: mediaData.id,
+          mimeType: mediaData.mime_type ?? "application/octet-stream",
+          originalFilename: mediaData.filename,
+          accessToken: account.accessToken,
+          phoneNumberId: account.phoneNumberId,
+        });
+      }
+    }
   }
 
   // Handle status updates
@@ -192,7 +233,40 @@ async function processEvent(
       .where(eq(messages.waMessageId, status.id));
   }
 
-  return processed;
+  return result;
+}
+
+async function downloadPendingMedia(
+  app: FastifyInstance,
+  items: PendingMediaDownload[],
+): Promise<void> {
+  const basePath = resolveBasePath(app.env as { MEDIA_STORAGE_PATH?: string });
+
+  for (const item of items) {
+    try {
+      const client = createWhatsAppClient({
+        phoneNumberId: item.phoneNumberId,
+        accessToken: item.accessToken,
+        apiVersion: app.env.WHATSAPP_API_VERSION,
+      });
+
+      const mediaInfo = await client.getMediaUrl(item.waMediaId);
+      const { buffer, mimeType } = await client.downloadMedia(mediaInfo.url);
+
+      await saveMedia(app.db, basePath, {
+        tenantId: item.tenantId,
+        waMediaId: item.waMediaId,
+        messageId: item.messageId,
+        buffer,
+        mimeType: mimeType ?? item.mimeType,
+        originalFilename: item.originalFilename,
+      });
+
+      app.log.info({ waMediaId: item.waMediaId, size: buffer.length }, "Media downloaded and stored");
+    } catch (err) {
+      app.log.error({ err, waMediaId: item.waMediaId }, "Failed to download media");
+    }
+  }
 }
 
 async function processAutoReplies(

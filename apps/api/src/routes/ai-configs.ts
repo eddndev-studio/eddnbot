@@ -5,6 +5,30 @@ import { aiConfigs } from "@eddnbot/db/schema";
 
 const providerEnum = z.enum(["openai", "anthropic", "gemini"]);
 
+const thinkingConfigSchema = z.discriminatedUnion("provider", [
+  z.object({
+    provider: z.literal("openai"),
+    config: z.object({
+      effort: z.enum(["none", "minimal", "low", "medium", "high", "xhigh"]),
+    }),
+  }),
+  z.object({
+    provider: z.literal("anthropic"),
+    config: z.object({
+      budgetTokens: z.number().int().min(1024).max(128000),
+    }),
+  }),
+  z.object({
+    provider: z.literal("gemini"),
+    config: z.object({
+      thinkingBudget: z.number().int().min(0).max(65536).optional(),
+      thinkingLevel: z.enum(["minimal", "low", "medium", "high"]).optional(),
+    }).refine((d) => d.thinkingBudget != null || d.thinkingLevel != null, {
+      message: "Either thinkingBudget or thinkingLevel must be provided",
+    }),
+  }),
+]);
+
 const createAiConfigSchema = z.object({
   label: z.string().min(1).max(100).default("default"),
   provider: providerEnum,
@@ -12,7 +36,7 @@ const createAiConfigSchema = z.object({
   systemPrompt: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
   maxOutputTokens: z.number().int().positive().optional(),
-  thinkingConfig: z.record(z.unknown()).optional(),
+  thinkingConfig: thinkingConfigSchema.optional(),
 });
 
 const updateAiConfigSchema = z.object({
@@ -22,13 +46,17 @@ const updateAiConfigSchema = z.object({
   systemPrompt: z.string().nullable().optional(),
   temperature: z.number().min(0).max(2).nullable().optional(),
   maxOutputTokens: z.number().int().positive().nullable().optional(),
-  thinkingConfig: z.record(z.unknown()).nullable().optional(),
+  thinkingConfig: thinkingConfigSchema.nullable().optional(),
 });
 
 export async function aiConfigRoutes(app: FastifyInstance) {
   // POST /ai/configs
   app.post("/ai/configs", async (request, reply) => {
     const body = createAiConfigSchema.parse(request.body);
+
+    if (body.thinkingConfig && body.thinkingConfig.provider !== body.provider) {
+      return reply.code(400).send({ error: "thinkingConfig.provider must match provider" });
+    }
 
     try {
       const [config] = await app.db

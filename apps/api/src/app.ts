@@ -13,6 +13,7 @@ import { rateLimitPlugin } from "./plugins/rate-limit";
 import { usageTrackingPlugin } from "./plugins/usage-tracking";
 import { healthRoutes } from "./routes/health";
 import { aiConfigRoutes } from "./routes/ai-configs";
+import { aiModelRoutes } from "./routes/ai-models";
 import { aiChatRoutes } from "./routes/ai-chat";
 import { aiTranscribeRoutes } from "./routes/ai-transcribe";
 import { whatsappAccountRoutes } from "./routes/whatsapp-accounts";
@@ -81,6 +82,7 @@ export async function buildApp(env: Env) {
   // Tenant routes
   await app.register(healthRoutes);
   await app.register(aiConfigRoutes);
+  await app.register(aiModelRoutes);
   await app.register(aiChatRoutes);
   await app.register(aiTranscribeRoutes);
   await app.register(whatsappWebhookRoutes);

@@ -86,6 +86,69 @@ describe("POST /ai/configs", () => {
 
     expect(response.statusCode).toBe(401);
   });
+
+  it("accepts valid thinkingConfig for openai", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "openai",
+      model: "o3",
+      thinkingConfig: { provider: "openai", config: { effort: "high" } },
+    });
+
+    expect(response.statusCode).toBe(201);
+    const body = response.json();
+    expect(body.thinkingConfig).toEqual({ provider: "openai", config: { effort: "high" } });
+  });
+
+  it("accepts valid thinkingConfig for anthropic", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "anthropic",
+      model: "claude-opus-4-6",
+      thinkingConfig: { provider: "anthropic", config: { budgetTokens: 10000 } },
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json().thinkingConfig.config.budgetTokens).toBe(10000);
+  });
+
+  it("accepts valid thinkingConfig for gemini with thinkingBudget", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "gemini",
+      model: "gemini-2.5-pro",
+      thinkingConfig: { provider: "gemini", config: { thinkingBudget: 8192 } },
+    });
+
+    expect(response.statusCode).toBe(201);
+  });
+
+  it("accepts valid thinkingConfig for gemini with thinkingLevel", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "gemini",
+      model: "gemini-3-flash-preview",
+      thinkingConfig: { provider: "gemini", config: { thinkingLevel: "high" } },
+    });
+
+    expect(response.statusCode).toBe(201);
+  });
+
+  it("rejects invalid thinkingConfig", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "openai",
+      model: "o3",
+      thinkingConfig: { provider: "openai", config: { effort: "invalid" } },
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("rejects thinkingConfig provider mismatch", async () => {
+    const { response } = await authedRequest("POST", "/ai/configs", {
+      provider: "openai",
+      model: "o3",
+      thinkingConfig: { provider: "anthropic", config: { budgetTokens: 10000 } },
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
 });
 
 describe("GET /ai/configs", () => {

@@ -28,6 +28,7 @@ import { adminTenantRoutes } from "./routes/admin/tenants";
 import { adminApiKeyRoutes } from "./routes/admin/api-keys";
 import { adminOverviewRoutes } from "./routes/admin/overview";
 import { adminUsageRoutes } from "./routes/admin/usage";
+import { mediaRoutes } from "./routes/media";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -96,6 +97,7 @@ export async function buildApp(env: Env) {
       await api.register(conversationRoutes);
       await api.register(tenantQuotaRoutes);
       await api.register(usageRoutes);
+      await api.register(mediaRoutes);
     },
     { prefix: "/api" },
   );

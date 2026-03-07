@@ -43,7 +43,9 @@ export function AiConfigForm({ mode, configId }: Props) {
   const [thinkingBudget, setThinkingBudget] = useState("");
   const [thinkingLevel, setThinkingLevel] = useState("medium");
 
-  const { data: models } = useAiModels(provider);
+  // In edit mode, use existing provider once loaded to avoid race condition
+  const effectiveProvider = mode === "edit" && existing ? existing.provider : provider;
+  const { data: models, isLoading: modelsLoading } = useAiModels(effectiveProvider);
   const selectedModel = models?.find((m) => m.id === model);
 
   useEffect(() => {
@@ -75,8 +77,8 @@ export function AiConfigForm({ mode, configId }: Props) {
   }, [existing, mode]);
 
   useEffect(() => {
-    if (models && model && !models.find((m) => m.id === model)) {
-      setCustomModel(true);
+    if (models && model) {
+      setCustomModel(!models.find((m) => m.id === model));
     }
   }, [models, model]);
 
@@ -113,7 +115,7 @@ export function AiConfigForm({ mode, configId }: Props) {
     }
   }
 
-  if (mode === "edit" && isLoading) {
+  if (mode === "edit" && (isLoading || modelsLoading)) {
     return <Skeleton className="h-96 rounded-lg bg-neutral-800" />;
   }
 

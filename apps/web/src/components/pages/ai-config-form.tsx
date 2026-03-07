@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,7 +55,6 @@ export function AiConfigForm({ mode, configId }: Props) {
       setTemperature(existing.temperature?.toString() ?? "");
       setMaxOutputTokens(existing.maxOutputTokens?.toString() ?? "");
 
-      // Hydrate thinking state
       if (existing.thinkingConfig) {
         setThinkingEnabled(true);
         const tc = existing.thinkingConfig;
@@ -76,14 +74,12 @@ export function AiConfigForm({ mode, configId }: Props) {
     }
   }, [existing, mode]);
 
-  // Check if model is custom (not in registry)
   useEffect(() => {
     if (models && model && !models.find((m) => m.id === model)) {
       setCustomModel(true);
     }
   }, [models, model]);
 
-  // Reset model when provider changes (only in create mode or manual changes)
   function handleProviderChange(newProvider: typeof provider) {
     setProvider(newProvider);
     setModel("");
@@ -104,7 +100,6 @@ export function AiConfigForm({ mode, configId }: Props) {
     setCustomModel(false);
     setModel(value);
 
-    // Set thinking defaults from model capabilities
     const m = models?.find((mod) => mod.id === value);
     if (m?.capabilities.thinking) {
       setThinkingEnabled(false);
@@ -188,14 +183,31 @@ export function AiConfigForm({ mode, configId }: Props) {
   const canThink = !!thinkingCaps;
 
   return (
-    <Card className="mx-auto max-w-lg border-neutral-800 bg-neutral-900/60">
-      <CardHeader>
-        <CardTitle className="text-neutral-100">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-neutral-100">
           {mode === "create" ? "New AI Config" : "Edit AI Config"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: "/ai-configs" })}
+            className="border-neutral-700 text-neutral-300"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={pending}>
+            {pending ? "Saving..." : mode === "create" ? "Create" : "Update"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[1fr_1fr] gap-6">
+        {/* Left column — Model selection */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Model</h2>
+
           <div className="space-y-2">
             <Label className="text-neutral-300">Label</Label>
             <Input
@@ -205,74 +217,66 @@ export function AiConfigForm({ mode, configId }: Props) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Provider</Label>
-            <Select value={provider} onValueChange={(v) => handleProviderChange(v as typeof provider)}>
-              <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-neutral-700 bg-neutral-800">
-                <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="anthropic">Anthropic</SelectItem>
-                <SelectItem value="gemini">Gemini</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Model</Label>
-            {customModel ? (
-              <div className="space-y-2">
-                <Input
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder="Enter custom model ID..."
-                  className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => { setCustomModel(false); setModel(""); }}
-                  className="text-xs text-neutral-500 hover:text-neutral-300"
-                >
-                  Back to model list
-                </button>
-              </div>
-            ) : (
-              <Select value={model} onValueChange={handleModelSelect}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Provider</Label>
+              <Select value={provider} onValueChange={(v) => handleProviderChange(v as typeof provider)}>
                 <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
-                  <SelectValue placeholder="Select a model..." />
+                  <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="max-h-60 border-neutral-700 bg-neutral-800">
-                  {models?.map((m) => (
-                    <SelectItem key={m.id} value={m.id}>
-                      <span>{m.name}</span>
-                      <span className="ml-2 text-xs text-neutral-500">{m.id}</span>
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="__custom__">
-                    <span className="text-neutral-400">Custom model...</span>
-                  </SelectItem>
+                <SelectContent className="border-neutral-700 bg-neutral-800">
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
+                  <SelectItem value="gemini">Gemini</SelectItem>
                 </SelectContent>
               </Select>
-            )}
-            {selectedModel && (
-              <p className="text-xs text-neutral-500">
-                Max output: {selectedModel.capabilities.maxOutputTokens.toLocaleString()} tokens
-              </p>
-            )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Model</Label>
+              {customModel ? (
+                <div className="space-y-1">
+                  <Input
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder="Custom model ID..."
+                    className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { setCustomModel(false); setModel(""); }}
+                    className="text-xs text-neutral-500 hover:text-neutral-300"
+                  >
+                    Back to model list
+                  </button>
+                </div>
+              ) : (
+                <Select value={model} onValueChange={handleModelSelect}>
+                  <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
+                    <SelectValue placeholder="Select a model..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 border-neutral-700 bg-neutral-800">
+                    {models?.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        <span>{m.name}</span>
+                        <span className="ml-2 text-xs text-neutral-500">{m.id}</span>
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="__custom__">
+                      <span className="text-neutral-400">Custom model...</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">System Prompt</Label>
-            <Textarea
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
-              rows={4}
-              placeholder="Optional system prompt..."
-              className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
-            />
-          </div>
+          {selectedModel && (
+            <p className="text-xs text-neutral-500">
+              Max output: {selectedModel.capabilities.maxOutputTokens.toLocaleString()} tokens
+            </p>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -304,7 +308,7 @@ export function AiConfigForm({ mode, configId }: Props) {
 
           {/* Thinking Configuration */}
           {(canThink || customModel) && (
-            <div className="space-y-3 rounded-lg border border-neutral-800 bg-neutral-950/40 p-4">
+            <div className="space-y-3 rounded-md border border-neutral-800 bg-neutral-950/40 p-4">
               <div className="flex items-center justify-between">
                 <Label className="text-neutral-300">Thinking / Reasoning</Label>
                 <Switch
@@ -327,23 +331,25 @@ export function AiConfigForm({ mode, configId }: Props) {
               )}
             </div>
           )}
+        </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : mode === "create" ? "Create" : "Update"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate({ to: "/ai-configs" })}
-              className="border-neutral-700 text-neutral-300"
-            >
-              Cancel
-            </Button>
+        {/* Right column — System Prompt */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Prompt</h2>
+
+          <div className="space-y-2">
+            <Label className="text-neutral-300">System Prompt</Label>
+            <Textarea
+              value={systemPrompt}
+              onChange={(e) => setSystemPrompt(e.target.value)}
+              rows={16}
+              placeholder="Optional system prompt..."
+              className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
+            />
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </form>
   );
 }
 
@@ -366,7 +372,6 @@ function ThinkingConfigUI({
   thinkingLevel: string;
   onLevelChange: (v: string) => void;
 }) {
-  // Determine the thinking type
   const type = thinkingCaps?.type;
 
   if (provider === "openai" || type === "effort") {
@@ -452,7 +457,6 @@ function ThinkingConfigUI({
     );
   }
 
-  // Fallback for custom models — show effort select
   return (
     <div className="space-y-2">
       <Label className="text-xs text-neutral-400">Reasoning Effort</Label>

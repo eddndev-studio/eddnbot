@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,12 +78,34 @@ export function WhatsAppTemplateForm({ accountId }: Props) {
   }
 
   return (
-    <Card className="mx-auto max-w-lg border-neutral-800 bg-neutral-900/60">
-      <CardHeader>
-        <CardTitle className="text-neutral-100">New Message Template</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-neutral-100">New Message Template</h1>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              navigate({
+                to: "/whatsapp-accounts/$accountId/templates",
+                params: { accountId },
+              })
+            }
+            className="border-neutral-700 text-neutral-300"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={createMutation.isPending}>
+            {createMutation.isPending ? "Submitting..." : "Create Template"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-[1fr_1fr] gap-6">
+        {/* Left column — Metadata */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Details</h2>
+
           <div className="space-y-2">
             <Label className="text-neutral-300">Name</Label>
             <Input
@@ -101,38 +122,44 @@ export function WhatsAppTemplateForm({ accountId }: Props) {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Language</Label>
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-neutral-700 bg-neutral-800">
-                {LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Language</Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-neutral-700 bg-neutral-800">
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Category</Label>
+              <Select
+                value={category}
+                onValueChange={(v) => setCategory(v as TemplateCategory)}
+              >
+                <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-neutral-700 bg-neutral-800">
+                  <SelectItem value="MARKETING">Marketing</SelectItem>
+                  <SelectItem value="UTILITY">Utility</SelectItem>
+                  <SelectItem value="AUTHENTICATION">Authentication</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Category</Label>
-            <Select
-              value={category}
-              onValueChange={(v) => setCategory(v as TemplateCategory)}
-            >
-              <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-neutral-700 bg-neutral-800">
-                <SelectItem value="MARKETING">Marketing</SelectItem>
-                <SelectItem value="UTILITY">Utility</SelectItem>
-                <SelectItem value="AUTHENTICATION">Authentication</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Right column — Content */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Content</h2>
 
           <div className="space-y-2">
             <Label className="text-neutral-300">Header (optional)</Label>
@@ -151,7 +178,7 @@ export function WhatsAppTemplateForm({ accountId }: Props) {
               onChange={(e) => setBody(e.target.value)}
               placeholder="Hello {{1}}, your order {{2}} has been confirmed."
               required
-              rows={4}
+              rows={6}
               className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
             />
             <p className="text-xs text-neutral-500">
@@ -168,27 +195,8 @@ export function WhatsAppTemplateForm({ accountId }: Props) {
               className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
             />
           </div>
-
-          <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Submitting..." : "Create Template"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                navigate({
-                  to: "/whatsapp-accounts/$accountId/templates",
-                  params: { accountId },
-                })
-              }
-              className="border-neutral-700 text-neutral-300"
-            >
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </form>
   );
 }

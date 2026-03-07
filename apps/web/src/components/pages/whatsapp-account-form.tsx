@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -106,34 +105,52 @@ export function WhatsAppAccountForm({ mode, accountId }: Props) {
   const pending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Card className="mx-auto max-w-lg border-neutral-800 bg-neutral-900/60">
-      <CardHeader>
-        <CardTitle className="text-neutral-100">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-neutral-100">
           {mode === "create" ? "New WhatsApp Account" : "Edit WhatsApp Account"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Phone Number ID</Label>
-            <Input
-              value={phoneNumberId}
-              onChange={(e) => setPhoneNumberId(e.target.value)}
-              disabled={mode === "edit"}
-              required
-              className="border-neutral-700 bg-neutral-800 text-neutral-100"
-            />
-          </div>
+        </h1>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: "/whatsapp-accounts" })}
+            className="border-neutral-700 text-neutral-300"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={pending}>
+            {pending ? "Saving..." : mode === "create" ? "Create" : "Update"}
+          </Button>
+        </div>
+      </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">WABA ID</Label>
-            <Input
-              value={wabaId}
-              onChange={(e) => setWabaId(e.target.value)}
-              disabled={mode === "edit"}
-              required
-              className="border-neutral-700 bg-neutral-800 text-neutral-100"
-            />
+      <div className="grid grid-cols-[1fr_1fr] gap-6">
+        {/* Left column — Meta API credentials */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Meta API</h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Phone Number ID</Label>
+              <Input
+                value={phoneNumberId}
+                onChange={(e) => setPhoneNumberId(e.target.value)}
+                disabled={mode === "edit"}
+                required
+                className="border-neutral-700 bg-neutral-800 text-neutral-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-neutral-300">WABA ID</Label>
+              <Input
+                value={wabaId}
+                onChange={(e) => setWabaId(e.target.value)}
+                disabled={mode === "edit"}
+                required
+                className="border-neutral-700 bg-neutral-800 text-neutral-100"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -147,25 +164,31 @@ export function WhatsAppAccountForm({ mode, accountId }: Props) {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Display Phone Number</Label>
-            <Input
-              value={displayPhoneNumber}
-              onChange={(e) => setDisplayPhoneNumber(e.target.value)}
-              placeholder="+1 555 123 4567"
-              className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Display Phone Number</Label>
+              <Input
+                value={displayPhoneNumber}
+                onChange={(e) => setDisplayPhoneNumber(e.target.value)}
+                placeholder="+1 555 123 4567"
+                className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-neutral-300">Webhook Verify Token</Label>
+              <Input
+                value={webhookVerifyToken}
+                onChange={(e) => setWebhookVerifyToken(e.target.value)}
+                placeholder="Optional"
+                className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
+              />
+            </div>
           </div>
+        </div>
 
-          <div className="space-y-2">
-            <Label className="text-neutral-300">Webhook Verify Token</Label>
-            <Input
-              value={webhookVerifyToken}
-              onChange={(e) => setWebhookVerifyToken(e.target.value)}
-              placeholder="Optional"
-              className="border-neutral-700 bg-neutral-800 text-neutral-100 placeholder:text-neutral-600"
-            />
-          </div>
+        {/* Right column — Behavior */}
+        <div className="space-y-5 rounded-lg border border-neutral-800 bg-neutral-900/60 p-5">
+          <h2 className="text-sm font-medium text-neutral-400">Behavior</h2>
 
           <div className="space-y-2">
             <Label className="text-neutral-300">AI Config</Label>
@@ -196,34 +219,18 @@ export function WhatsAppAccountForm({ mode, accountId }: Props) {
             </div>
           )}
 
-          <div className="flex gap-2 pt-2">
-            <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : mode === "create" ? "Create" : "Update"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => navigate({ to: "/whatsapp-accounts" })}
-              className="border-neutral-700 text-neutral-300"
-            >
-              Cancel
-            </Button>
-          </div>
-
           {mode === "edit" && accountId && (
-            <div className="border-t border-neutral-800 pt-4">
-              <Button variant="outline" asChild className="w-full border-neutral-700 text-neutral-300">
-                <Link
-                  to="/whatsapp-accounts/$accountId/templates"
-                  params={{ accountId }}
-                >
-                  Manage Templates
-                </Link>
-              </Button>
-            </div>
+            <Button variant="outline" asChild className="w-full border-neutral-700 text-neutral-300">
+              <Link
+                to="/whatsapp-accounts/$accountId/templates"
+                params={{ accountId }}
+              >
+                Manage Templates
+              </Link>
+            </Button>
           )}
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </form>
   );
 }

@@ -10,7 +10,11 @@ export type {
   OpenAiThinkingConfig,
   AnthropicThinkingConfig,
   GeminiThinkingConfig,
+  ContentPart,
+  TextPart,
+  ImagePart,
 } from "./types";
+export { contentToString, normalizeContent } from "./types";
 export type {
   TranscriptionAdapter,
   TranscriptionConfig,

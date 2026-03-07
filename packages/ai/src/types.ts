@@ -2,9 +2,22 @@ export type AiProvider = "openai" | "anthropic" | "gemini";
 
 export type MessageRole = "system" | "user" | "assistant";
 
+export interface TextPart {
+  type: "text";
+  text: string;
+}
+
+export interface ImagePart {
+  type: "image";
+  mimeType: string;
+  data: string; // base64-encoded
+}
+
+export type ContentPart = TextPart | ImagePart;
+
 export interface ChatMessage {
   role: MessageRole;
-  content: string;
+  content: string | ContentPart[];
 }
 
 export interface OpenAiThinkingConfig {
@@ -47,4 +60,19 @@ export interface AiResponse {
 
 export interface AiProviderAdapter {
   chat(messages: ChatMessage[], config: AiEngineConfig): Promise<AiResponse>;
+}
+
+/** Extract text from content, whether string or ContentPart[]. */
+export function contentToString(content: string | ContentPart[]): string {
+  if (typeof content === "string") return content;
+  return content
+    .filter((p): p is TextPart => p.type === "text")
+    .map((p) => p.text)
+    .join("\n");
+}
+
+/** Normalize content to ContentPart[]. */
+export function normalizeContent(content: string | ContentPart[]): ContentPart[] {
+  if (typeof content === "string") return [{ type: "text", text: content }];
+  return content;
 }

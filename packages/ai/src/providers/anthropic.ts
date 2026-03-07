@@ -1,6 +1,27 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse } from "../types";
+import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse, ContentPart } from "../types";
 import { AiEngineError } from "../errors";
+
+type AnthropicContent = string | Array<
+  | { type: "text"; text: string }
+  | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+>;
+
+function mapContent(content: string | ContentPart[]): AnthropicContent {
+  if (typeof content === "string") return content;
+
+  return content.map((part) => {
+    if (part.type === "text") return { type: "text" as const, text: part.text };
+    return {
+      type: "image" as const,
+      source: {
+        type: "base64" as const,
+        media_type: part.mimeType,
+        data: part.data,
+      },
+    };
+  });
+}
 
 export function createAnthropicAdapter(client?: Anthropic): AiProviderAdapter {
   return {
@@ -17,7 +38,10 @@ export function createAnthropicAdapter(client?: Anthropic): AiProviderAdapter {
           system: config.systemPrompt,
           messages: messages
             .filter((m) => m.role !== "system")
-            .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
+            .map((m) => ({
+              role: m.role as "user" | "assistant",
+              content: mapContent(m.content),
+            })),
           temperature: thinkingEnabled ? 1.0 : config.temperature,
           max_tokens: config.maxOutputTokens ?? 4096,
           ...(thinkingEnabled

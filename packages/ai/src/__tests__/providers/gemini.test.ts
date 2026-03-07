@@ -115,6 +115,29 @@ describe("Gemini adapter", () => {
     expect(call.config.maxOutputTokens).toBe(1000);
   });
 
+  it("maps multimodal ContentPart[] to Gemini format", async () => {
+    const client = mockGeminiClient({ text: "A cat photo" });
+
+    const adapter = createGeminiAdapter(client);
+    const messages: ChatMessage[] = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "What is this?" },
+          { type: "image", mimeType: "image/jpeg", data: "b64data" },
+        ],
+      },
+    ];
+
+    await adapter.chat(messages, baseConfig);
+
+    const call = (client.models.generateContent as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(call.contents[0].parts).toEqual([
+      { text: "What is this?" },
+      { inlineData: { mimeType: "image/jpeg", data: "b64data" } },
+    ]);
+  });
+
   it("wraps errors in AiEngineError", async () => {
     const client = mockGeminiClient(undefined);
     (client.models.generateContent as ReturnType<typeof vi.fn>).mockRejectedValue(

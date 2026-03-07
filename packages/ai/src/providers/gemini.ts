@@ -1,12 +1,16 @@
 import { GoogleGenAI } from "@google/genai";
-import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse } from "../types";
+import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse, ContentPart } from "../types";
 import { AiEngineError } from "../errors";
+
+type GeminiPart =
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } };
 
 export interface GeminiClient {
   models: {
     generateContent(params: {
       model: string;
-      contents: Array<{ role: string; parts: Array<{ text: string }> }>;
+      contents: Array<{ role: string; parts: GeminiPart[] }>;
       config?: {
         systemInstruction?: string;
         temperature?: number;
@@ -23,6 +27,15 @@ export interface GeminiClient {
   };
 }
 
+function mapParts(content: string | ContentPart[]): GeminiPart[] {
+  if (typeof content === "string") return [{ text: content }];
+
+  return content.map((part) => {
+    if (part.type === "text") return { text: part.text };
+    return { inlineData: { mimeType: part.mimeType, data: part.data } };
+  });
+}
+
 export function createGeminiAdapter(client?: GeminiClient): AiProviderAdapter {
   return {
     async chat(messages: ChatMessage[], config: AiEngineConfig): Promise<AiResponse> {
@@ -36,7 +49,7 @@ export function createGeminiAdapter(client?: GeminiClient): AiProviderAdapter {
           .filter((m) => m.role !== "system")
           .map((m) => ({
             role: m.role === "assistant" ? "model" : "user",
-            parts: [{ text: m.content }],
+            parts: mapParts(m.content),
           }));
 
         const response = await gemini.models.generateContent({

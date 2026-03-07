@@ -92,6 +92,31 @@ describe("OpenAI adapter", () => {
     expect(call.reasoning_effort).toBeUndefined();
   });
 
+  it("maps multimodal ContentPart[] to OpenAI format", async () => {
+    const client = mockOpenAiClient({
+      choices: [{ message: { content: "I see a cat" }, finish_reason: "stop" }],
+    });
+
+    const adapter = createOpenAiAdapter(client as never);
+    const messages: ChatMessage[] = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "What is in this image?" },
+          { type: "image", mimeType: "image/jpeg", data: "base64data" },
+        ],
+      },
+    ];
+
+    await adapter.chat(messages, baseConfig);
+
+    const call = client.chat.completions.create.mock.calls[0][0];
+    expect(call.messages[0].content).toEqual([
+      { type: "text", text: "What is in this image?" },
+      { type: "image_url", image_url: { url: "data:image/jpeg;base64,base64data" } },
+    ]);
+  });
+
   it("wraps errors in AiEngineError", async () => {
     const client = mockOpenAiClient(undefined);
     client.chat.completions.create.mockRejectedValue(new Error("Network error"));

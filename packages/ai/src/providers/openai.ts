@@ -1,6 +1,23 @@
 import OpenAI from "openai";
-import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse } from "../types";
+import type { AiProviderAdapter, ChatMessage, AiEngineConfig, AiResponse, ContentPart } from "../types";
 import { AiEngineError } from "../errors";
+
+type OpenAiContent = string | Array<
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+>;
+
+function mapContent(content: string | ContentPart[]): OpenAiContent {
+  if (typeof content === "string") return content;
+
+  return content.map((part) => {
+    if (part.type === "text") return { type: "text" as const, text: part.text };
+    return {
+      type: "image_url" as const,
+      image_url: { url: `data:${part.mimeType};base64,${part.data}` },
+    };
+  });
+}
 
 export function createOpenAiAdapter(client?: OpenAI): AiProviderAdapter {
   return {
@@ -19,8 +36,11 @@ export function createOpenAiAdapter(client?: OpenAI): AiProviderAdapter {
           model: config.model,
           messages: [
             ...systemMessages,
-            ...messages.map((m) => ({ role: m.role, content: m.content })),
-          ],
+            ...messages.map((m) => ({
+              role: m.role,
+              content: mapContent(m.content),
+            })),
+          ] as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
           temperature: config.temperature,
           max_completion_tokens: config.maxOutputTokens,
           ...(thinkingConfig ? { reasoning_effort: thinkingConfig.effort } : {}),

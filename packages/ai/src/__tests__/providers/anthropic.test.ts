@@ -118,6 +118,32 @@ describe("Anthropic adapter", () => {
     expect(call.messages).toEqual([{ role: "user", content: "Hi" }]);
   });
 
+  it("maps multimodal ContentPart[] to Anthropic format", async () => {
+    const client = mockAnthropicClient({
+      content: [{ type: "text", text: "I see a cat" }],
+      usage: { input_tokens: 100, output_tokens: 10 },
+    });
+
+    const adapter = createAnthropicAdapter(client as never);
+    const messages: ChatMessage[] = [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "Describe this" },
+          { type: "image", mimeType: "image/png", data: "b64data" },
+        ],
+      },
+    ];
+
+    await adapter.chat(messages, baseConfig);
+
+    const call = client.messages.create.mock.calls[0][0];
+    expect(call.messages[0].content).toEqual([
+      { type: "text", text: "Describe this" },
+      { type: "image", source: { type: "base64", media_type: "image/png", data: "b64data" } },
+    ]);
+  });
+
   it("wraps errors in AiEngineError", async () => {
     const client = mockAnthropicClient(undefined);
     client.messages.create.mockRejectedValue(new Error("API error"));

@@ -243,7 +243,7 @@ export function AiConfigForm({ mode, configId }: Props) {
                 <SelectTrigger className="border-neutral-700 bg-neutral-800 text-neutral-100">
                   <SelectValue placeholder="Select a model..." />
                 </SelectTrigger>
-                <SelectContent className="border-neutral-700 bg-neutral-800">
+                <SelectContent className="max-h-60 border-neutral-700 bg-neutral-800">
                   {models?.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       <span>{m.name}</span>

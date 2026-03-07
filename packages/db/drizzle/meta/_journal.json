@@ -50,6 +50,13 @@
       "when": 1772896452559,
       "tag": "0006_large_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772904875422,
+      "tag": "0007_auth_accounts",
+      "breakpoints": true
     }
   ]
 }

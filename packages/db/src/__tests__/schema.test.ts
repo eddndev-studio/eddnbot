@@ -3,7 +3,9 @@ import { eq } from "drizzle-orm";
 import { testDb } from "./helpers/test-db";
 import {
   tenants,
-  users,
+  accounts,
+  accountCredentials,
+  tenantMembers,
   apiKeys,
   aiConfigs,
   whatsappAccounts,
@@ -35,16 +37,21 @@ describe("tenants", () => {
     ).rejects.toThrow();
   });
 
-  it("cascade deletes users and api_keys when tenant is deleted", async () => {
+  it("cascade deletes tenant_members and api_keys when tenant is deleted", async () => {
     const [tenant] = await testDb
       .insert(tenants)
       .values({ name: "Acme", slug: "acme" })
       .returning();
 
-    await testDb.insert(users).values({
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+
+    await testDb.insert(tenantMembers).values({
+      accountId: account.id,
       tenantId: tenant.id,
-      email: "user@acme.com",
-      name: "Test User",
+      role: "owner",
     });
 
     await testDb.insert(apiKeys).values({
@@ -55,40 +62,216 @@ describe("tenants", () => {
 
     await testDb.delete(tenants).where(eq(tenants.id, tenant.id));
 
-    const remainingUsers = await testDb
+    const remainingMembers = await testDb
       .select()
-      .from(users)
-      .where(eq(users.tenantId, tenant.id));
+      .from(tenantMembers)
+      .where(eq(tenantMembers.tenantId, tenant.id));
     const remainingKeys = await testDb
       .select()
       .from(apiKeys)
       .where(eq(apiKeys.tenantId, tenant.id));
 
-    expect(remainingUsers).toHaveLength(0);
+    expect(remainingMembers).toHaveLength(0);
     expect(remainingKeys).toHaveLength(0);
   });
 });
 
-describe("users", () => {
-  it("inserts and queries a user", async () => {
+describe("accounts", () => {
+  it("inserts and queries an account", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+
+    expect(account.id).toBeDefined();
+    expect(account.email).toBe("user@acme.com");
+    expect(account.name).toBe("Test User");
+    expect(account.createdAt).toBeInstanceOf(Date);
+  });
+
+  it("enforces unique email constraint", async () => {
+    await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "User 1" });
+
+    await expect(
+      testDb.insert(accounts).values({ email: "user@acme.com", name: "User 2" }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("accountCredentials", () => {
+  it("inserts credentials for an account", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+
+    const [creds] = await testDb
+      .insert(accountCredentials)
+      .values({
+        accountId: account.id,
+        passwordHash: "hashed_password_here",
+      })
+      .returning();
+
+    expect(creds.id).toBeDefined();
+    expect(creds.accountId).toBe(account.id);
+    expect(creds.emailVerified).toBe(false);
+    expect(creds.emailVerifyToken).toBeNull();
+    expect(creds.passwordResetToken).toBeNull();
+  });
+
+  it("enforces unique account_id constraint", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+
+    await testDb.insert(accountCredentials).values({
+      accountId: account.id,
+      passwordHash: "hash1",
+    });
+
+    await expect(
+      testDb.insert(accountCredentials).values({
+        accountId: account.id,
+        passwordHash: "hash2",
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("cascade deletes when account is deleted", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+
+    await testDb.insert(accountCredentials).values({
+      accountId: account.id,
+      passwordHash: "hash",
+    });
+
+    await testDb.delete(accounts).where(eq(accounts.id, account.id));
+
+    const remaining = await testDb
+      .select()
+      .from(accountCredentials)
+      .where(eq(accountCredentials.accountId, account.id));
+    expect(remaining).toHaveLength(0);
+  });
+});
+
+describe("tenantMembers", () => {
+  it("inserts a membership", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
     const [tenant] = await testDb
       .insert(tenants)
       .values({ name: "Acme", slug: "acme" })
       .returning();
 
-    const [user] = await testDb
-      .insert(users)
-      .values({
-        tenantId: tenant.id,
-        email: "user@acme.com",
-        name: "Test User",
-      })
+    const [member] = await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant.id, role: "owner" })
       .returning();
 
-    expect(user.id).toBeDefined();
-    expect(user.tenantId).toBe(tenant.id);
-    expect(user.email).toBe("user@acme.com");
-    expect(user.role).toBe("member");
+    expect(member.id).toBeDefined();
+    expect(member.accountId).toBe(account.id);
+    expect(member.tenantId).toBe(tenant.id);
+    expect(member.role).toBe("owner");
+  });
+
+  it("defaults role to member", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    const [member] = await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant.id })
+      .returning();
+
+    expect(member.role).toBe("member");
+  });
+
+  it("enforces unique (account_id, tenant_id) constraint", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant.id });
+
+    await expect(
+      testDb
+        .insert(tenantMembers)
+        .values({ accountId: account.id, tenantId: tenant.id }),
+    ).rejects.toThrow();
+  });
+
+  it("allows same account in multiple tenants", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+    const [tenant1] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+    const [tenant2] = await testDb
+      .insert(tenants)
+      .values({ name: "Beta", slug: "beta" })
+      .returning();
+
+    await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant1.id, role: "owner" });
+    await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant2.id, role: "member" });
+
+    const memberships = await testDb
+      .select()
+      .from(tenantMembers)
+      .where(eq(tenantMembers.accountId, account.id));
+    expect(memberships).toHaveLength(2);
+  });
+
+  it("cascade deletes when account is deleted", async () => {
+    const [account] = await testDb
+      .insert(accounts)
+      .values({ email: "user@acme.com", name: "Test User" })
+      .returning();
+    const [tenant] = await testDb
+      .insert(tenants)
+      .values({ name: "Acme", slug: "acme" })
+      .returning();
+
+    await testDb
+      .insert(tenantMembers)
+      .values({ accountId: account.id, tenantId: tenant.id });
+
+    await testDb.delete(accounts).where(eq(accounts.id, account.id));
+
+    const remaining = await testDb
+      .select()
+      .from(tenantMembers)
+      .where(eq(tenantMembers.accountId, account.id));
+    expect(remaining).toHaveLength(0);
   });
 });
 

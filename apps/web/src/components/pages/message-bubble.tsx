@@ -19,24 +19,64 @@ function StatusIcon({ message }: { message: Message }) {
   return <Check className="size-3.5 text-neutral-400" />;
 }
 
+function getTextBody(content: Record<string, unknown>): string | null {
+  const text = content.text as { body?: string } | undefined;
+  return text?.body ?? null;
+}
+
+function getCaption(content: Record<string, unknown>, key: string): string | null {
+  const media = content[key] as { caption?: string } | undefined;
+  return media?.caption ?? null;
+}
+
+function getTemplateName(content: Record<string, unknown>): string | null {
+  const tpl = content.template as { name?: string } | undefined;
+  return tpl?.name ?? null;
+}
+
 function MessageContent({ message }: { message: Message }) {
+  const { content } = message;
+
   switch (message.type) {
-    case "text":
-      return <p className="whitespace-pre-wrap break-words">{message.content.body as string}</p>;
+    case "text": {
+      const body = getTextBody(content);
+      return <p className="whitespace-pre-wrap break-words">{body ?? ""}</p>;
+    }
+    case "image": {
+      const caption = getCaption(content, "image");
+      return caption
+        ? <p className="whitespace-pre-wrap break-words"><span className="italic text-neutral-400">[Image] </span>{caption}</p>
+        : <p className="italic text-neutral-400">[Image]</p>;
+    }
+    case "video": {
+      const caption = getCaption(content, "video");
+      return caption
+        ? <p className="whitespace-pre-wrap break-words"><span className="italic text-neutral-400">[Video] </span>{caption}</p>
+        : <p className="italic text-neutral-400">[Video]</p>;
+    }
+    case "document": {
+      const doc = content.document as { filename?: string; caption?: string } | undefined;
+      const label = doc?.filename ?? doc?.caption ?? null;
+      return label
+        ? <p className="whitespace-pre-wrap break-words"><span className="italic text-neutral-400">[Document] </span>{label}</p>
+        : <p className="italic text-neutral-400">[Document]</p>;
+    }
     case "audio":
       return <p className="italic text-neutral-400">[Audio]</p>;
-    case "image":
-      return <p className="italic text-neutral-400">[Image]</p>;
-    case "video":
-      return <p className="italic text-neutral-400">[Video]</p>;
-    case "document":
-      return <p className="italic text-neutral-400">[Document]</p>;
     case "sticker":
       return <p className="italic text-neutral-400">[Sticker]</p>;
     case "location":
       return <p className="italic text-neutral-400">[Location]</p>;
     case "contacts":
       return <p className="italic text-neutral-400">[Contact]</p>;
+    case "reaction": {
+      const emoji = (content.reaction as { emoji?: string })?.emoji;
+      return <p>{emoji ?? "👍"}</p>;
+    }
+    case "template": {
+      const name = getTemplateName(content);
+      return <p className="italic text-neutral-400">[Template: {name ?? "unknown"}]</p>;
+    }
     default:
       return <p className="italic text-neutral-400">[{message.type}]</p>;
   }

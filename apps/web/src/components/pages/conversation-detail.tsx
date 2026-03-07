@@ -36,14 +36,21 @@ export function ConversationDetail({ conversationId }: ConversationDetailProps) 
   const [page, setPage] = useState(1);
   const { data: messagesData, isLoading: msgsLoading } = useConversationMessages(conversationId, page);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [initialScrollDone, setInitialScrollDone] = useState(false);
+  const prevMessageCount = useRef(0);
 
   useEffect(() => {
-    if (messagesData && !initialScrollDone && scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      setInitialScrollDone(true);
+    if (!messagesData || !scrollRef.current) return;
+    const count = messagesData.data.length;
+    // Scroll to bottom on first load or when new messages arrive
+    if (prevMessageCount.current === 0 || count > prevMessageCount.current) {
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      });
     }
-  }, [messagesData, initialScrollDone]);
+    prevMessageCount.current = count;
+  }, [messagesData]);
 
   if (convLoading) {
     return (

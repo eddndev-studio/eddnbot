@@ -29,6 +29,8 @@ import { adminApiKeyRoutes } from "./routes/admin/api-keys";
 import { adminOverviewRoutes } from "./routes/admin/overview";
 import { adminUsageRoutes } from "./routes/admin/usage";
 import { mediaRoutes } from "./routes/media";
+import { appSessionRoutes } from "./routes/app/sessions";
+import { appChatRoutes } from "./routes/app/chat";
 import { createFilesystemStorage, createR2Storage, type StorageAdapter } from "./services/storage";
 
 declare module "fastify" {
@@ -110,6 +112,10 @@ export async function buildApp(env: Env) {
       await api.register(tenantQuotaRoutes);
       await api.register(usageRoutes);
       await api.register(mediaRoutes);
+
+      // App client routes (session + API key auth)
+      await api.register(appSessionRoutes);
+      await api.register(appChatRoutes);
     },
     { prefix: "/api" },
   );

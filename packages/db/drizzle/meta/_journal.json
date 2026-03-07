@@ -43,6 +43,13 @@
       "when": 1772851114536,
       "tag": "0005_red_amazoness",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772896452559,
+      "tag": "0006_large_silhouette",
+      "breakpoints": true
     }
   ]
 }

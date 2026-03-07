@@ -8,3 +8,5 @@ export { messages } from "./messages";
 export { usageEvents } from "./usage-events";
 export { tenantQuotas } from "./tenant-quotas";
 export { media } from "./media";
+export { chatSessions } from "./chat-sessions";
+export { chatMessages } from "./chat-messages";

@@ -47,6 +47,10 @@ function createMockAiEngine(): AiProviderAdapter {
       usage: { inputTokens: 10, outputTokens: 20 },
       finishReason: "stop",
     })),
+    async *chatStream() {
+      yield { type: "text" as const, content: "AI response text" };
+      yield { type: "done" as const };
+    },
   };
 }
 
@@ -558,6 +562,9 @@ describe("handleInboundMessage", () => {
         chat: vi.fn(async () => {
           throw new Error("AI service unavailable");
         }),
+        async *chatStream() {
+          throw new Error("AI service unavailable");
+        },
       };
 
       const errorLogger = { info: vi.fn(), error: vi.fn() };

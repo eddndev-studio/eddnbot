@@ -290,6 +290,9 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
       chat: vi.fn(async () => {
         throw new Error("AI is down");
       }),
+      async *chatStream() {
+        throw new Error("AI is down");
+      },
     });
 
     const tenant = await seedTenant();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -209,6 +209,19 @@ export function WhatsAppAccountForm({ mode, accountId }: Props) {
               Cancel
             </Button>
           </div>
+
+          {mode === "edit" && accountId && (
+            <div className="border-t border-neutral-800 pt-4">
+              <Button variant="outline" asChild className="w-full border-neutral-700 text-neutral-300">
+                <Link
+                  to="/whatsapp-accounts/$accountId/templates"
+                  params={{ accountId }}
+                >
+                  Manage Templates
+                </Link>
+              </Button>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

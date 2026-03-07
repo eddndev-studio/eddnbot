@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, Pencil, Trash2, MessageCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, MessageCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -104,6 +104,14 @@ export function WhatsAppAccountsList() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link
+                          to="/whatsapp-accounts/$accountId/templates"
+                          params={{ accountId: acct.id }}
+                        >
+                          <FileText className="size-4" />
+                        </Link>
+                      </Button>
                       <Button variant="ghost" size="sm" asChild>
                         <Link
                           to="/whatsapp-accounts/$accountId"

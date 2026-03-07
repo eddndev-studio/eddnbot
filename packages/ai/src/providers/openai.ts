@@ -48,12 +48,17 @@ export function createOpenAiAdapter(client?: OpenAI): AiProviderAdapter {
 
         const choice = response.choices[0];
 
+        const cachedTokens = (
+          response.usage as unknown as { prompt_tokens_details?: { cached_tokens?: number } }
+        )?.prompt_tokens_details?.cached_tokens;
+
         return {
           content: choice?.message?.content ?? "",
           usage: response.usage
             ? {
                 inputTokens: response.usage.prompt_tokens,
                 outputTokens: response.usage.completion_tokens,
+                cachedInputTokens: cachedTokens ?? undefined,
               }
             : undefined,
           finishReason: choice?.finish_reason ?? undefined,

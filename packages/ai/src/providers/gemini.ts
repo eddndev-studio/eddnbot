@@ -22,6 +22,7 @@ export interface GeminiClient {
       usageMetadata?: {
         promptTokenCount?: number;
         candidatesTokenCount?: number;
+        cachedContentTokenCount?: number;
       };
     }>;
   };
@@ -73,6 +74,7 @@ export function createGeminiAdapter(client?: GeminiClient): AiProviderAdapter {
             ? {
                 inputTokens: response.usageMetadata.promptTokenCount,
                 outputTokens: response.usageMetadata.candidatesTokenCount,
+                cachedInputTokens: response.usageMetadata.cachedContentTokenCount ?? undefined,
               }
             : undefined,
         };

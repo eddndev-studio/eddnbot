@@ -48,7 +48,9 @@ describe("Anthropic adapter", () => {
     await adapter.chat(userMessage, { ...baseConfig, systemPrompt: "Be helpful" });
 
     const call = client.messages.create.mock.calls[0][0];
-    expect(call.system).toBe("Be helpful");
+    expect(call.system).toEqual([
+      { type: "text", text: "Be helpful", cache_control: { type: "ephemeral" } },
+    ]);
   });
 
   it("passes thinking config with budget_tokens when enabled", async () => {

@@ -35,7 +35,9 @@ export function createAnthropicAdapter(client?: Anthropic): AiProviderAdapter {
       try {
         const response = await anthropic.messages.create({
           model: config.model,
-          system: config.systemPrompt,
+          system: config.systemPrompt
+            ? [{ type: "text" as const, text: config.systemPrompt, cache_control: { type: "ephemeral" as const } }]
+            : undefined,
           messages: messages
             .filter((m) => m.role !== "system")
             .map((m) => ({
@@ -57,6 +59,13 @@ export function createAnthropicAdapter(client?: Anthropic): AiProviderAdapter {
         const textBlock = response.content.find((b) => b.type === "text");
         const thinkingBlock = response.content.find((b) => b.type === "thinking");
 
+        const cacheUsage = response.usage as unknown as {
+          cache_read_input_tokens?: number;
+          cache_creation_input_tokens?: number;
+        };
+        const cachedTokens =
+          (cacheUsage.cache_read_input_tokens ?? 0) + (cacheUsage.cache_creation_input_tokens ?? 0);
+
         return {
           content: textBlock?.type === "text" ? textBlock.text : "",
           thinkingContent:
@@ -64,6 +73,7 @@ export function createAnthropicAdapter(client?: Anthropic): AiProviderAdapter {
           usage: {
             inputTokens: response.usage.input_tokens,
             outputTokens: response.usage.output_tokens,
+            cachedInputTokens: cachedTokens || undefined,
           },
           finishReason: response.stop_reason ?? undefined,
         };

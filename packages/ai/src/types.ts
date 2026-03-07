@@ -54,6 +54,7 @@ export interface AiResponse {
   usage?: {
     inputTokens?: number;
     outputTokens?: number;
+    cachedInputTokens?: number;
   };
   finishReason?: string;
 }

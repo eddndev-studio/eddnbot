@@ -14,7 +14,7 @@ const createSchema = z.object({
         type: z.enum(["HEADER", "BODY", "FOOTER", "BUTTONS"]),
         format: z.enum(["TEXT", "IMAGE", "VIDEO", "DOCUMENT"]).optional(),
         text: z.string().optional(),
-        buttons: z.array(z.record(z.unknown())).optional(),
+        buttons: z.array(z.object({ type: z.string(), text: z.string() }).passthrough()).optional(),
       }),
     )
     .min(1),

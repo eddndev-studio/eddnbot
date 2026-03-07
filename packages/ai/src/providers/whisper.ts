@@ -17,7 +17,7 @@ export function createWhisperAdapter(client?: OpenAI): TranscriptionAdapter {
 
       try {
         const response = await openai.audio.transcriptions.create({
-          file: new File([file], fileName),
+          file: new File([new Uint8Array(file) as Uint8Array<ArrayBuffer>], fileName),
           model: config.model,
           language: config.language,
           prompt: config.prompt,
@@ -26,7 +26,7 @@ export function createWhisperAdapter(client?: OpenAI): TranscriptionAdapter {
         });
 
         // When response_format is verbose_json, the response includes extra fields
-        const result = response as Record<string, unknown>;
+        const result = response as unknown as Record<string, unknown>;
 
         return {
           text: typeof result.text === "string" ? result.text : String(result),

@@ -67,8 +67,8 @@ async function resolveTenantForAccount(
 }
 
 export const authPlugin = fp(async (app: FastifyInstance) => {
-  app.decorateRequest("tenant", null);
-  app.decorateRequest("apiKey", null);
+  app.decorateRequest("tenant", null as never);
+  app.decorateRequest("apiKey", null as never);
   app.decorateRequest("chatSession", null);
   app.decorateRequest("account", null);
 

@@ -42,6 +42,7 @@ export function useConversations(params: ConversationListParams = {}) {
   return useQuery({
     queryKey: KEYS.list(params),
     queryFn: () => api.get<PaginatedResponse<ConversationListItem>>(path),
+    refetchInterval: 10_000,
   });
 }
 
@@ -58,6 +59,7 @@ export function useConversationMessages(id: string, page: number = 1) {
     queryKey: KEYS.messages(id, page),
     queryFn: () => api.get<PaginatedResponse<Message>>(`/conversations/${id}/messages?page=${page}&limit=50`),
     enabled: !!id,
+    refetchInterval: 5_000,
   });
 }
 
@@ -65,5 +67,6 @@ export function useConversationStats() {
   return useQuery({
     queryKey: KEYS.stats,
     queryFn: () => api.get<ConversationStats>("/conversations/stats"),
+    refetchInterval: 30_000,
   });
 }

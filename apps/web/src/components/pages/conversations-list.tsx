@@ -72,7 +72,7 @@ export function ConversationsList() {
           {conversations.map((conv) => {
             const lastMsgText =
               conv.lastMessage?.type === "text"
-                ? (conv.lastMessage.content.body as string)
+                ? ((conv.lastMessage.content.text as { body?: string })?.body ?? null)
                 : conv.lastMessage
                   ? `[${conv.lastMessage.type}]`
                   : null;

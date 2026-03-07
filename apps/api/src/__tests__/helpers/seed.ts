@@ -1,4 +1,4 @@
-import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents } from "@eddnbot/db/schema";
+import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents, accounts, accountCredentials, tenantMembers } from "@eddnbot/db/schema";
 import { generateApiKey } from "../../lib/api-key-utils";
 import { testDb } from "./test-db";
 
@@ -108,6 +108,51 @@ export async function seedTenantQuota(
     })
     .returning();
   return quota;
+}
+
+export async function seedAccount(
+  overrides: Partial<typeof accounts.$inferInsert> = {},
+) {
+  const [account] = await testDb
+    .insert(accounts)
+    .values({
+      email: `user-${Date.now()}@test.com`,
+      name: "Test User",
+      ...overrides,
+    })
+    .returning();
+  return account;
+}
+
+export async function seedAccountCredentials(
+  accountId: string,
+  overrides: Partial<typeof accountCredentials.$inferInsert> = {},
+) {
+  const [creds] = await testDb
+    .insert(accountCredentials)
+    .values({
+      accountId,
+      passwordHash: "not-a-real-hash",
+      ...overrides,
+    })
+    .returning();
+  return creds;
+}
+
+export async function seedTenantMember(
+  accountId: string,
+  tenantId: string,
+  overrides: Partial<typeof tenantMembers.$inferInsert> = {},
+) {
+  const [member] = await testDb
+    .insert(tenantMembers)
+    .values({
+      accountId,
+      tenantId,
+      ...overrides,
+    })
+    .returning();
+  return member;
 }
 
 export async function seedUsageEvent(

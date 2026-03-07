@@ -1,20 +1,23 @@
 import fp from "fastify-plugin";
 import type { FastifyInstance } from "fastify";
 import { eq, and, isNull } from "drizzle-orm";
-import { apiKeys, tenants, chatSessions } from "@eddnbot/db/schema";
+import { apiKeys, tenants, chatSessions, authSessions, accounts } from "@eddnbot/db/schema";
 import { hashApiKey } from "../lib/api-key-utils";
 import { hashSessionToken } from "../lib/session-token-utils";
+import { hashToken } from "../lib/auth-token-utils";
 
 declare module "fastify" {
   interface FastifyRequest {
     tenant: typeof tenants.$inferSelect;
     apiKey: typeof apiKeys.$inferSelect;
     chatSession: typeof chatSessions.$inferSelect | null;
+    account: typeof accounts.$inferSelect | null;
   }
   interface FastifyContextConfig {
     skipAuth?: boolean;
     adminOnly?: boolean;
     sessionAuth?: boolean;
+    accountAuth?: boolean;
   }
 }
 
@@ -22,6 +25,7 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
   app.decorateRequest("tenant", null);
   app.decorateRequest("apiKey", null);
   app.decorateRequest("chatSession", null);
+  app.decorateRequest("account", null);
 
   app.addHook("onRequest", async (request, reply) => {
     if (request.routeOptions.config?.adminOnly) {
@@ -33,6 +37,37 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
     }
 
     if (request.routeOptions.config?.skipAuth) return;
+
+    // Account auth (Bearer token for web/mobile user sessions)
+    if (request.routeOptions.config?.accountAuth) {
+      const authHeader = request.headers.authorization;
+      if (!authHeader?.startsWith("Bearer ")) {
+        return reply.code(401).send({ error: "Missing access token" });
+      }
+
+      const rawToken = authHeader.slice(7);
+      const tokenHash = hashToken(rawToken);
+
+      const result = await app.db
+        .select()
+        .from(authSessions)
+        .innerJoin(accounts, eq(authSessions.accountId, accounts.id))
+        .where(eq(authSessions.tokenHash, tokenHash))
+        .limit(1);
+
+      if (result.length === 0) {
+        return reply.code(401).send({ error: "Invalid access token" });
+      }
+
+      const { auth_sessions: session, accounts: account } = result[0];
+
+      if (session.expiresAt < new Date()) {
+        return reply.code(401).send({ error: "Access token expired" });
+      }
+
+      request.account = account;
+      return;
+    }
 
     // Session-based auth (Bearer token for app routes)
     if (request.routeOptions.config?.sessionAuth) {

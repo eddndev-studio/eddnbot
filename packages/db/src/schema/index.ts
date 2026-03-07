@@ -2,6 +2,7 @@ export { tenants } from "./tenants";
 export { accounts } from "./accounts";
 export { accountCredentials } from "./account-credentials";
 export { tenantMembers } from "./tenant-members";
+export { authSessions } from "./auth-sessions";
 export { apiKeys } from "./api-keys";
 export { aiConfigs } from "./ai-configs";
 export { whatsappAccounts } from "./whatsapp-accounts";

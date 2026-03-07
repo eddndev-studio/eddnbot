@@ -27,6 +27,7 @@ export {
   MODEL_REGISTRY,
   getModelsByProvider,
   getModelById,
+  modelSupportsVision,
   type ModelDefinition,
   type ModelCapabilities,
 } from "./model-registry";

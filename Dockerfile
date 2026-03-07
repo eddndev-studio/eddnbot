@@ -10,6 +10,7 @@ COPY apps/web/package.json apps/web/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/ai/package.json packages/ai/package.json
 COPY packages/whatsapp/package.json packages/whatsapp/package.json
+COPY packages/email/package.json packages/email/package.json
 COPY packages/config-ts/package.json packages/config-ts/package.json
 COPY packages/config-lint/package.json packages/config-lint/package.json
 RUN pnpm install --frozen-lockfile

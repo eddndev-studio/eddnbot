@@ -443,8 +443,8 @@ describe("handleInboundMessage", () => {
     });
   });
 
-  describe("unsupported types", () => {
-    it("skips auto-reply for image messages", async () => {
+  describe("image messages (vision)", () => {
+    it("sends image to AI with vision-capable model", async () => {
       const tenant = await seedTenant();
       const account = await seedWhatsAppAccount(tenant.id);
       const conv = await seedConversation(account.id, { contactPhone: "5491100011111" });
@@ -456,22 +456,68 @@ describe("handleInboundMessage", () => {
         db: testDb,
         whatsappClient: mockClient,
         aiEngine: mockAi,
-        aiEngineConfig: baseAiConfig,
+        aiEngineConfig: baseAiConfig, // gpt-4o has vision
+        logger: mockLogger,
+        mediaStorage: {
+          getMediaBuffer: vi.fn(async () => ({
+            buffer: Buffer.from("fake-image"),
+            mimeType: "image/jpeg",
+          })),
+        },
+      };
+
+      await handleInboundMessage(deps, {
+        conversationId: conv.id,
+        messageType: "image",
+        messageContent: { image: { id: "img-123", caption: "Look at this" } },
+        contactPhone: "5491100011111",
+        waMessageId: "wamid.test011",
+      });
+
+      expect(mockAi.chat).toHaveBeenCalledTimes(1);
+      const chatCall = (mockAi.chat as ReturnType<typeof vi.fn>).mock.calls[0];
+      const lastMessage = chatCall[0][chatCall[0].length - 1];
+      // Content should be ContentPart[] with text + image
+      expect(lastMessage.content).toEqual([
+        { type: "text", text: "Look at this" },
+        { type: "image", mimeType: "image/jpeg", data: Buffer.from("fake-image").toString("base64") },
+      ]);
+      expect(mockClient.sendMessage).toHaveBeenCalled();
+    });
+
+    it("uses text fallback for non-vision models", async () => {
+      const tenant = await seedTenant();
+      const account = await seedWhatsAppAccount(tenant.id);
+      const conv = await seedConversation(account.id, { contactPhone: "5491100011112" });
+
+      const mockClient = createMockWhatsAppClient();
+      const mockAi = createMockAiEngine();
+
+      const deps: ConversationHandlerDeps = {
+        db: testDb,
+        whatsappClient: mockClient,
+        aiEngine: mockAi,
+        aiEngineConfig: { ...baseAiConfig, model: "o3-mini" }, // no vision
         logger: mockLogger,
       };
 
       await handleInboundMessage(deps, {
         conversationId: conv.id,
         messageType: "image",
-        messageContent: { image: { id: "img-123" } },
-        contactPhone: "5491100011111",
-        waMessageId: "wamid.test011",
+        messageContent: { image: { id: "img-456", caption: "A sunset" } },
+        contactPhone: "5491100011112",
+        waMessageId: "wamid.test011b",
       });
 
-      expect(mockAi.chat).not.toHaveBeenCalled();
-      expect(mockClient.sendMessage).not.toHaveBeenCalled();
+      expect(mockAi.chat).toHaveBeenCalledTimes(1);
+      const chatCall = (mockAi.chat as ReturnType<typeof vi.fn>).mock.calls[0];
+      const lastMessage = chatCall[0][chatCall[0].length - 1];
+      // Should be text fallback, not multimodal
+      expect(lastMessage.content).toBe('[The user sent an image with caption: "A sunset"]');
     });
+  });
 
+  describe("unsupported types", () => {
     it("skips auto-reply for sticker messages", async () => {
       const tenant = await seedTenant();
       const account = await seedWhatsAppAccount(tenant.id);

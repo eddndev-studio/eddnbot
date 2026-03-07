@@ -13,7 +13,7 @@ import { createAiEngine, createWhisperAdapter } from "@eddnbot/ai";
 import type { AiProvider, AiEngineConfig, ThinkingConfig } from "@eddnbot/ai";
 import { handleInboundMessage, type ConversationHandlerDeps } from "../services/conversation-handler";
 import { trackAiTokens, trackWhatsAppMessage, checkQuota } from "../services/usage-tracker";
-import { saveMedia, resolveBasePath } from "../services/media-storage";
+import { saveMedia, resolveBasePath, getMediaByWaId, getMediaBuffer } from "../services/media-storage";
 
 export interface ProcessedInboundMessage {
   whatsappAccountId: string;
@@ -338,6 +338,18 @@ async function processAutoReplies(
           redis: app.redis,
         },
         tenantId: account.tenantId,
+        mediaStorage: {
+          async getMediaBuffer(waMediaId: string) {
+            const record = await getMediaByWaId(app.db, waMediaId);
+            if (!record) return null;
+            try {
+              const buffer = await getMediaBuffer(record.storagePath);
+              return { buffer, mimeType: record.mimeType };
+            } catch {
+              return null;
+            }
+          },
+        },
       };
 
       // Add whisper if audio and OpenAI key available

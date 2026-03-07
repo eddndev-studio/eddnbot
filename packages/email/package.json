@@ -1,0 +1,19 @@
+{
+  "name": "@eddnbot/email",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.1004.0"
+  },
+  "devDependencies": {
+    "@eddnbot/config-ts": "workspace:*",
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.18"
+  }
+}

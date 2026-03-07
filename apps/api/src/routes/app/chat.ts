@@ -169,7 +169,7 @@ export async function appChatRoutes(app: FastifyInstance) {
               reply.raw.write(`event: usage\ndata: ${JSON.stringify(chunk.usage)}\n\n`);
               break;
 
-            case "done":
+            case "done": {
               // Store assistant message
               const [saved] = await app.db
                 .insert(chatMessages)
@@ -199,6 +199,7 @@ export async function appChatRoutes(app: FastifyInstance) {
                 `event: done\ndata: ${JSON.stringify({ messageId: saved.id })}\n\n`,
               );
               break;
+            }
           }
         }
       } catch (err) {

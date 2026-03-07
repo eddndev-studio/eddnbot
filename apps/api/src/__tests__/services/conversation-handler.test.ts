@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, vi, afterAll } from "vitest";
 import { eq } from "drizzle-orm";
 import { messages } from "@eddnbot/db/schema";
 import { testDb } from "../helpers/test-db";
@@ -7,7 +7,6 @@ import {
   seedTenant,
   seedWhatsAppAccount,
   seedConversation,
-  seedAiConfig,
 } from "../helpers/seed";
 import {
   handleInboundMessage,

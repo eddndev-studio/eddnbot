@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { eq, ilike, and, sql } from "drizzle-orm";
+import { eq, ilike, and } from "drizzle-orm";
 import { tenants } from "@eddnbot/db/schema";
 
 const createTenantSchema = z.object({

@@ -16,6 +16,7 @@ function parseMonth(query: Record<string, string>) {
 }
 
 async function getUsageForTenant(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: typeof import("@eddnbot/db/client").createDb extends (...args: any[]) => infer R ? R : never,
   tenantId: string,
   monthStart: Date,

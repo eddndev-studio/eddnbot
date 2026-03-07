@@ -65,6 +65,7 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
     });
 
     // Build the outbound message
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { accountId: _, ...msgFields } = body;
     const message = msgFields as unknown as OutboundMessage;
 

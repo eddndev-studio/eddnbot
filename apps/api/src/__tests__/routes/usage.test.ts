@@ -10,7 +10,7 @@ describe("GET /usage", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/usage",
+      url: "/api/usage",
       headers: { "x-api-key": rawKey },
     });
 
@@ -49,14 +49,14 @@ describe("GET /usage", () => {
     });
     await seedUsageEvent(tenant.id, {
       eventType: "api_request",
-      endpoint: "/ai/chat",
+      endpoint: "/api/ai/chat",
       method: "POST",
       statusCode: 200,
     });
 
     const res = await app.inject({
       method: "GET",
-      url: "/usage",
+      url: "/api/usage",
       headers: { "x-api-key": rawKey },
     });
 
@@ -82,7 +82,7 @@ describe("GET /usage", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/usage",
+      url: "/api/usage",
       headers: { "x-api-key": rawKey },
     });
 
@@ -107,7 +107,7 @@ describe("GET /usage", () => {
     // Query a different month
     const res = await app.inject({
       method: "GET",
-      url: "/usage?month=2025-01",
+      url: "/api/usage?month=2025-01",
       headers: { "x-api-key": rawKey },
     });
 
@@ -123,7 +123,7 @@ describe("GET /usage", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/usage",
+      url: "/api/usage",
     });
 
     expect(res.statusCode).toBe(401);

@@ -32,7 +32,7 @@ describe("GET /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${account.id}/templates`,
+      url: `/api/whatsapp/accounts/${account.id}/templates`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -57,7 +57,7 @@ describe("GET /whatsapp/accounts/:accountId/templates", () => {
 
     await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${account.id}/templates?status=APPROVED&category=MARKETING`,
+      url: `/api/whatsapp/accounts/${account.id}/templates?status=APPROVED&category=MARKETING`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -76,7 +76,7 @@ describe("GET /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${other.id}/templates`,
+      url: `/api/whatsapp/accounts/${other.id}/templates`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -86,7 +86,7 @@ describe("GET /whatsapp/accounts/:accountId/templates", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/whatsapp/accounts/00000000-0000-0000-0000-000000000000/templates",
+      url: "/api/whatsapp/accounts/00000000-0000-0000-0000-000000000000/templates",
     });
 
     expect(response.statusCode).toBe(401);
@@ -105,7 +105,7 @@ describe("GET /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${account.id}/templates`,
+      url: `/api/whatsapp/accounts/${account.id}/templates`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -130,7 +130,7 @@ describe("POST /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: `/whatsapp/accounts/${account.id}/templates`,
+      url: `/api/whatsapp/accounts/${account.id}/templates`,
       headers: { "x-api-key": rawKey },
       payload: {
         name: "order_confirm",
@@ -155,7 +155,7 @@ describe("POST /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: `/whatsapp/accounts/${account.id}/templates`,
+      url: `/api/whatsapp/accounts/${account.id}/templates`,
       headers: { "x-api-key": rawKey },
       payload: {
         name: "BAD NAME!",
@@ -181,7 +181,7 @@ describe("POST /whatsapp/accounts/:accountId/templates", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: `/whatsapp/accounts/${account.id}/templates`,
+      url: `/api/whatsapp/accounts/${account.id}/templates`,
       headers: { "x-api-key": rawKey },
       payload: {
         name: "duplicate_name",
@@ -212,7 +212,7 @@ describe("DELETE /whatsapp/accounts/:accountId/templates/:templateName", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: `/whatsapp/accounts/${account.id}/templates/old_template`,
+      url: `/api/whatsapp/accounts/${account.id}/templates/old_template`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -229,7 +229,7 @@ describe("DELETE /whatsapp/accounts/:accountId/templates/:templateName", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: `/whatsapp/accounts/${other.id}/templates/some_template`,
+      url: `/api/whatsapp/accounts/${other.id}/templates/some_template`,
       headers: { "x-api-key": rawKey },
     });
 

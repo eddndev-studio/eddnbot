@@ -1,5 +1,5 @@
 const STORAGE_KEY = "eddnbot_api_key";
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
 export function getApiKey(): string | null {
   return localStorage.getItem(STORAGE_KEY);

@@ -46,7 +46,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
       headers: { "x-api-key": rawKey },
     });
 
@@ -60,7 +60,7 @@ describe("GET /conversations", () => {
   });
 
   it("returns empty list when tenant has no conversations", async () => {
-    const { response } = await authedRequest("GET", "/conversations");
+    const { response } = await authedRequest("GET", "/api/conversations");
 
     expect(response.statusCode).toBe(200);
     const body = response.json();
@@ -79,7 +79,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
       headers: { "x-api-key": rawKey },
     });
 
@@ -98,7 +98,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
       headers: { "x-api-key": rawKey },
     });
 
@@ -118,7 +118,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
       headers: { "x-api-key": rawKey },
     });
 
@@ -136,7 +136,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations?accountId=${account1.id}`,
+      url: `/api/conversations?accountId=${account1.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -154,7 +154,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations?status=active",
+      url: "/api/conversations?status=active",
       headers: { "x-api-key": rawKey },
     });
 
@@ -172,7 +172,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations?search=Alice",
+      url: "/api/conversations?search=Alice",
       headers: { "x-api-key": rawKey },
     });
 
@@ -191,7 +191,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations?page=1&limit=2",
+      url: "/api/conversations?page=1&limit=2",
       headers: { "x-api-key": rawKey },
     });
 
@@ -220,7 +220,7 @@ describe("GET /conversations", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
       headers: { "x-api-key": rawKey },
     });
 
@@ -232,7 +232,7 @@ describe("GET /conversations", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/conversations",
+      url: "/api/conversations",
     });
 
     expect(response.statusCode).toBe(401);
@@ -248,7 +248,7 @@ describe("GET /conversations/:id", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}`,
+      url: `/api/conversations/${conv.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -262,7 +262,7 @@ describe("GET /conversations/:id", () => {
   it("returns 404 for non-existent conversation", async () => {
     const { response } = await authedRequest(
       "GET",
-      "/conversations/00000000-0000-0000-0000-000000000000",
+      "/api/conversations/00000000-0000-0000-0000-000000000000",
     );
 
     expect(response.statusCode).toBe(404);
@@ -277,7 +277,7 @@ describe("GET /conversations/:id", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}`,
+      url: `/api/conversations/${conv.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -287,7 +287,7 @@ describe("GET /conversations/:id", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/conversations/00000000-0000-0000-0000-000000000000",
+      url: "/api/conversations/00000000-0000-0000-0000-000000000000",
     });
 
     expect(response.statusCode).toBe(401);
@@ -306,7 +306,7 @@ describe("GET /conversations/:id/messages", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}/messages`,
+      url: `/api/conversations/${conv.id}/messages`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -329,7 +329,7 @@ describe("GET /conversations/:id/messages", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}/messages?page=2&limit=2`,
+      url: `/api/conversations/${conv.id}/messages?page=2&limit=2`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -349,7 +349,7 @@ describe("GET /conversations/:id/messages", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}/messages`,
+      url: `/api/conversations/${conv.id}/messages`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -364,7 +364,7 @@ describe("GET /conversations/:id/messages", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}/messages`,
+      url: `/api/conversations/${conv.id}/messages`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -388,7 +388,7 @@ describe("GET /conversations/:id/messages", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/conversations/${conv.id}/messages`,
+      url: `/api/conversations/${conv.id}/messages`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -405,7 +405,7 @@ describe("GET /conversations/:id/messages", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/conversations/00000000-0000-0000-0000-000000000000/messages",
+      url: "/api/conversations/00000000-0000-0000-0000-000000000000/messages",
     });
 
     expect(response.statusCode).toBe(401);
@@ -426,7 +426,7 @@ describe("GET /conversations/stats", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/conversations/stats",
+      url: "/api/conversations/stats",
       headers: { "x-api-key": rawKey },
     });
 
@@ -438,7 +438,7 @@ describe("GET /conversations/stats", () => {
   });
 
   it("returns zero stats for empty tenant", async () => {
-    const { response } = await authedRequest("GET", "/conversations/stats");
+    const { response } = await authedRequest("GET", "/api/conversations/stats");
 
     expect(response.statusCode).toBe(200);
     const body = response.json();

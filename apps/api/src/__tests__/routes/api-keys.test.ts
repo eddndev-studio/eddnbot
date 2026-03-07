@@ -20,7 +20,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/admin/tenants/${tenant.id}/api-keys`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys`,
         headers: adminHeaders,
         payload: { scopes: ["read"] },
       });
@@ -40,7 +40,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/admin/tenants/${tenant.id}/api-keys`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys`,
         headers: adminHeaders,
         payload: {},
       });
@@ -56,7 +56,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/admin/tenants/${tenant.id}/api-keys`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys`,
         headers: adminHeaders,
         payload: { expiresAt },
       });
@@ -71,7 +71,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "POST",
-        url: `/admin/tenants/${tenant.id}/api-keys`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys`,
         payload: {},
       });
 
@@ -88,7 +88,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}/api-keys`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys`,
         headers: adminHeaders,
       });
 
@@ -105,7 +105,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
         headers: adminHeaders,
       });
 
@@ -119,7 +119,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/admin/tenants/${tenant.id}/api-keys/00000000-0000-0000-0000-000000000000`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys/00000000-0000-0000-0000-000000000000`,
         headers: adminHeaders,
       });
 
@@ -133,7 +133,7 @@ describe("admin api-key routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
+        url: `/api/admin/tenants/${tenant.id}/api-keys/${apiKey.id}`,
         headers: adminHeaders,
       });
 

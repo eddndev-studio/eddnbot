@@ -22,7 +22,7 @@ describe("auth plugin", () => {
   });
 
   it("skips auth on routes with skipAuth config", async () => {
-    const res = await app.inject({ method: "GET", url: "/health" });
+    const res = await app.inject({ method: "GET", url: "/api/health" });
     expect(res.statusCode).toBe(200);
   });
 

@@ -21,7 +21,7 @@ describe("POST /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
       payload: {
         phoneNumberId: "111222333",
@@ -47,7 +47,7 @@ describe("POST /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
       payload: { phoneNumberId: "123" },
     });
@@ -62,7 +62,7 @@ describe("POST /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
       payload: {
         phoneNumberId: "dupe-phone",
@@ -77,7 +77,7 @@ describe("POST /whatsapp/accounts", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       payload: {
         phoneNumberId: "123",
         wabaId: "waba",
@@ -95,7 +95,7 @@ describe("POST /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
       payload: {
         phoneNumberId: `ai-cfg-${Date.now()}`,
@@ -120,7 +120,7 @@ describe("POST /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
       payload: {
         phoneNumberId: `cross-cfg-${Date.now()}`,
@@ -143,7 +143,7 @@ describe("GET /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
     });
 
@@ -162,7 +162,7 @@ describe("GET /whatsapp/accounts", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/whatsapp/accounts",
+      url: "/api/whatsapp/accounts",
       headers: { "x-api-key": rawKey },
     });
 
@@ -180,7 +180,7 @@ describe("GET /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${account.id}`,
+      url: `/api/whatsapp/accounts/${account.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -196,7 +196,7 @@ describe("GET /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/whatsapp/accounts/${other.id}`,
+      url: `/api/whatsapp/accounts/${other.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -212,7 +212,7 @@ describe("PATCH /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/whatsapp/accounts/${account.id}`,
+      url: `/api/whatsapp/accounts/${account.id}`,
       headers: { "x-api-key": rawKey },
       payload: {
         displayPhoneNumber: "+1999888777",
@@ -234,7 +234,7 @@ describe("PATCH /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/whatsapp/accounts/${other.id}`,
+      url: `/api/whatsapp/accounts/${other.id}`,
       headers: { "x-api-key": rawKey },
       payload: { isActive: false },
     });
@@ -250,7 +250,7 @@ describe("PATCH /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/whatsapp/accounts/${account.id}`,
+      url: `/api/whatsapp/accounts/${account.id}`,
       headers: { "x-api-key": rawKey },
       payload: {
         aiConfigId: config.id,
@@ -273,7 +273,7 @@ describe("DELETE /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: `/whatsapp/accounts/${account.id}`,
+      url: `/api/whatsapp/accounts/${account.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -286,7 +286,7 @@ describe("DELETE /whatsapp/accounts/:accountId", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: "/whatsapp/accounts/00000000-0000-0000-0000-000000000000",
+      url: "/api/whatsapp/accounts/00000000-0000-0000-0000-000000000000",
       headers: { "x-api-key": rawKey },
     });
 

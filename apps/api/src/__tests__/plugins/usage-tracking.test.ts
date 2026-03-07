@@ -13,7 +13,7 @@ describe("usage-tracking plugin", () => {
 
     await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -28,7 +28,7 @@ describe("usage-tracking plugin", () => {
     expect(events.length).toBeGreaterThanOrEqual(1);
     const apiEvent = events.find((e) => e.eventType === "api_request");
     expect(apiEvent).toBeDefined();
-    expect(apiEvent!.endpoint).toBe("/ai/configs");
+    expect(apiEvent!.endpoint).toBe("/api/ai/configs");
     expect(apiEvent!.method).toBe("GET");
     expect(apiEvent!.statusCode).toBe(200);
 
@@ -40,7 +40,7 @@ describe("usage-tracking plugin", () => {
 
     await app.inject({
       method: "GET",
-      url: "/health",
+      url: "/api/health",
     });
 
     await new Promise((r) => setTimeout(r, 100));

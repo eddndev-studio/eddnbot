@@ -29,7 +29,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/admin/overview/stats",
+        url: "/api/admin/overview/stats",
         headers: adminHeaders,
       });
 
@@ -50,7 +50,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}/ai-configs`,
+        url: `/api/admin/tenants/${tenant.id}/ai-configs`,
         headers: adminHeaders,
       });
 
@@ -67,7 +67,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}/whatsapp-accounts`,
+        url: `/api/admin/tenants/${tenant.id}/whatsapp-accounts`,
         headers: adminHeaders,
       });
 
@@ -83,7 +83,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}/quotas`,
+        url: `/api/admin/tenants/${tenant.id}/quotas`,
         headers: adminHeaders,
       });
 
@@ -98,7 +98,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}/quotas`,
+        url: `/api/admin/tenants/${tenant.id}/quotas`,
         headers: adminHeaders,
       });
 
@@ -114,7 +114,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: `/admin/tenants/${tenant.id}/quotas`,
+        url: `/api/admin/tenants/${tenant.id}/quotas`,
         headers: adminHeaders,
         payload: { maxAiTokensPerMonth: 50000 },
       });
@@ -130,7 +130,7 @@ describe("admin overview routes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: `/admin/tenants/${tenant.id}/quotas`,
+        url: `/api/admin/tenants/${tenant.id}/quotas`,
         headers: adminHeaders,
         payload: { maxAiTokensPerMonth: 99999 },
       });

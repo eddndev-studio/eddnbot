@@ -10,7 +10,7 @@ describe("rate-limit plugin", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -32,7 +32,7 @@ describe("rate-limit plugin", () => {
     for (let i = 0; i < 2; i++) {
       const res = await app.inject({
         method: "GET",
-        url: "/ai/configs",
+        url: "/api/ai/configs",
         headers: { "x-api-key": rawKey },
       });
       expect(res.statusCode).toBe(200);
@@ -41,7 +41,7 @@ describe("rate-limit plugin", () => {
     // 3rd request should be blocked
     const res = await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -59,7 +59,7 @@ describe("rate-limit plugin", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -73,7 +73,7 @@ describe("rate-limit plugin", () => {
 
     const res = await app.inject({
       method: "GET",
-      url: "/health",
+      url: "/api/health",
     });
 
     expect(res.statusCode).toBe(200);

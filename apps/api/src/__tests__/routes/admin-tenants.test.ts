@@ -21,7 +21,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/admin/tenants",
+        url: "/api/admin/tenants",
         headers: adminHeaders,
       });
 
@@ -35,7 +35,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/admin/tenants?search=UniqueSearch",
+        url: "/api/admin/tenants?search=UniqueSearch",
         headers: adminHeaders,
       });
 
@@ -50,7 +50,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/admin/tenants?active=false",
+        url: "/api/admin/tenants?active=false",
         headers: adminHeaders,
       });
 
@@ -67,7 +67,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/tenants/${tenant.id}`,
+        url: `/api/admin/tenants/${tenant.id}`,
         headers: adminHeaders,
       });
 
@@ -79,7 +79,7 @@ describe("admin tenant routes", () => {
       const app = await appPromise;
       const res = await app.inject({
         method: "GET",
-        url: "/admin/tenants/00000000-0000-0000-0000-000000000000",
+        url: "/api/admin/tenants/00000000-0000-0000-0000-000000000000",
         headers: adminHeaders,
       });
 
@@ -94,7 +94,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: `/admin/tenants/${tenant.id}`,
+        url: `/api/admin/tenants/${tenant.id}`,
         headers: adminHeaders,
         payload: { name: "Updated Name" },
       });
@@ -109,7 +109,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "PATCH",
-        url: `/admin/tenants/${tenant.id}`,
+        url: `/api/admin/tenants/${tenant.id}`,
         headers: adminHeaders,
         payload: { isActive: false },
       });
@@ -122,7 +122,7 @@ describe("admin tenant routes", () => {
       const app = await appPromise;
       const res = await app.inject({
         method: "PATCH",
-        url: "/admin/tenants/00000000-0000-0000-0000-000000000000",
+        url: "/api/admin/tenants/00000000-0000-0000-0000-000000000000",
         headers: adminHeaders,
         payload: { name: "Nope" },
       });
@@ -138,7 +138,7 @@ describe("admin tenant routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: `/admin/tenants/${tenant.id}`,
+        url: `/api/admin/tenants/${tenant.id}`,
         headers: adminHeaders,
       });
 
@@ -149,7 +149,7 @@ describe("admin tenant routes", () => {
       const app = await appPromise;
       const res = await app.inject({
         method: "DELETE",
-        url: "/admin/tenants/00000000-0000-0000-0000-000000000000",
+        url: "/api/admin/tenants/00000000-0000-0000-0000-000000000000",
         headers: adminHeaders,
       });
 

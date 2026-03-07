@@ -17,7 +17,7 @@ describe("POST /admin/tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/admin/tenants",
+      url: "/api/admin/tenants",
       headers: adminHeaders,
       payload: { name: "Acme Corp", slug: "acme-corp" },
     });
@@ -34,7 +34,7 @@ describe("POST /admin/tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/admin/tenants",
+      url: "/api/admin/tenants",
       headers: adminHeaders,
       payload: { slug: "no-name" },
     });
@@ -47,7 +47,7 @@ describe("POST /admin/tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/admin/tenants",
+      url: "/api/admin/tenants",
       headers: adminHeaders,
       payload: { name: "Test", slug: "INVALID SLUG!" },
     });
@@ -61,7 +61,7 @@ describe("POST /admin/tenants", () => {
 
     const res = await app.inject({
       method: "POST",
-      url: "/admin/tenants",
+      url: "/api/admin/tenants",
       headers: adminHeaders,
       payload: { name: "Second", slug: "dup-slug" },
     });
@@ -74,7 +74,7 @@ describe("POST /admin/tenants", () => {
     const app = await appPromise;
     const res = await app.inject({
       method: "POST",
-      url: "/admin/tenants",
+      url: "/api/admin/tenants",
       payload: { name: "No Auth", slug: "no-auth" },
     });
 

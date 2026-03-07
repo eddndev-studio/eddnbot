@@ -1,5 +1,5 @@
 const STORAGE_KEY = "eddnbot_admin_token";
-const API_BASE = import.meta.env.VITE_API_URL ?? "";
+const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
 export function getAdminToken(): string | null {
   return localStorage.getItem(STORAGE_KEY);

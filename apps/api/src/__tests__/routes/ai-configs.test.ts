@@ -32,7 +32,7 @@ async function authedRequest(
 
 describe("POST /ai/configs", () => {
   it("creates an ai config for the authenticated tenant", async () => {
-    const { response, tenant } = await authedRequest("POST", "/ai/configs", {
+    const { response, tenant } = await authedRequest("POST", "/api/ai/configs", {
       provider: "openai",
       model: "gpt-4o",
       label: "default",
@@ -54,7 +54,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("returns 400 for invalid provider", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "invalid",
       model: "some-model",
     });
@@ -69,7 +69,7 @@ describe("POST /ai/configs", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
       payload: { provider: "openai", model: "gpt-4o", label: "dupe" },
     });
@@ -80,7 +80,7 @@ describe("POST /ai/configs", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "POST",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       payload: { provider: "openai", model: "gpt-4o" },
     });
 
@@ -88,7 +88,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("accepts valid thinkingConfig for openai", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "openai",
       model: "o3",
       thinkingConfig: { provider: "openai", config: { effort: "high" } },
@@ -100,7 +100,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("accepts valid thinkingConfig for anthropic", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "anthropic",
       model: "claude-opus-4-6",
       thinkingConfig: { provider: "anthropic", config: { budgetTokens: 10000 } },
@@ -111,7 +111,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("accepts valid thinkingConfig for gemini with thinkingBudget", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "gemini",
       model: "gemini-2.5-pro",
       thinkingConfig: { provider: "gemini", config: { thinkingBudget: 8192 } },
@@ -121,7 +121,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("accepts valid thinkingConfig for gemini with thinkingLevel", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "gemini",
       model: "gemini-3-flash-preview",
       thinkingConfig: { provider: "gemini", config: { thinkingLevel: "high" } },
@@ -131,7 +131,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("rejects invalid thinkingConfig", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "openai",
       model: "o3",
       thinkingConfig: { provider: "openai", config: { effort: "invalid" } },
@@ -141,7 +141,7 @@ describe("POST /ai/configs", () => {
   });
 
   it("rejects thinkingConfig provider mismatch", async () => {
-    const { response } = await authedRequest("POST", "/ai/configs", {
+    const { response } = await authedRequest("POST", "/api/ai/configs", {
       provider: "openai",
       model: "o3",
       thinkingConfig: { provider: "anthropic", config: { budgetTokens: 10000 } },
@@ -160,7 +160,7 @@ describe("GET /ai/configs", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -179,7 +179,7 @@ describe("GET /ai/configs", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/ai/configs",
+      url: "/api/ai/configs",
       headers: { "x-api-key": rawKey },
     });
 
@@ -197,7 +197,7 @@ describe("GET /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/ai/configs/${config.id}`,
+      url: `/api/ai/configs/${config.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -213,7 +213,7 @@ describe("GET /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: `/ai/configs/${otherConfig.id}`,
+      url: `/api/ai/configs/${otherConfig.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -229,7 +229,7 @@ describe("PATCH /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/ai/configs/${config.id}`,
+      url: `/api/ai/configs/${config.id}`,
       headers: { "x-api-key": rawKey },
       payload: {
         model: "gpt-4o-mini",
@@ -253,7 +253,7 @@ describe("PATCH /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "PATCH",
-      url: `/ai/configs/${otherConfig.id}`,
+      url: `/api/ai/configs/${otherConfig.id}`,
       headers: { "x-api-key": rawKey },
       payload: { model: "hack" },
     });
@@ -270,7 +270,7 @@ describe("DELETE /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: `/ai/configs/${config.id}`,
+      url: `/api/ai/configs/${config.id}`,
       headers: { "x-api-key": rawKey },
     });
 
@@ -283,7 +283,7 @@ describe("DELETE /ai/configs/:configId", () => {
 
     const response = await app.inject({
       method: "DELETE",
-      url: "/ai/configs/00000000-0000-0000-0000-000000000000",
+      url: "/api/ai/configs/00000000-0000-0000-0000-000000000000",
       headers: { "x-api-key": rawKey },
     });
 

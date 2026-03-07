@@ -13,13 +13,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/admin": "http://localhost:3001",
-      "/health": "http://localhost:3001",
-      "/ai/": "http://localhost:3001",
-      "/whatsapp/": "http://localhost:3001",
-      "/quotas": "http://localhost:3001",
-      "/conversations": "http://localhost:3001",
-      "/usage": "http://localhost:3001",
+      "/api": "http://localhost:3001",
     },
   },
 });

@@ -11,7 +11,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
       });
 
@@ -32,7 +32,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
       });
 
@@ -49,7 +49,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/quotas",
+        url: "/api/quotas",
       });
 
       expect(res.statusCode).toBe(401);
@@ -66,7 +66,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
         payload: {
           maxAiTokensPerMonth: 50000,
@@ -91,7 +91,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
         payload: { maxAiTokensPerMonth: 200000 },
       });
@@ -109,7 +109,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "PUT",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
         payload: { maxRequestsPerMinute: -5 },
       });
@@ -129,7 +129,7 @@ describe("tenant-quotas routes", () => {
 
       const res = await app.inject({
         method: "DELETE",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
       });
 
@@ -138,7 +138,7 @@ describe("tenant-quotas routes", () => {
       // Verify deleted
       const getRes = await app.inject({
         method: "GET",
-        url: "/quotas",
+        url: "/api/quotas",
         headers: { "x-api-key": rawKey },
       });
       expect(getRes.json().quotas).toBeNull();

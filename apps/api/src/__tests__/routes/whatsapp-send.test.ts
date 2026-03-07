@@ -38,7 +38,7 @@ describe("POST /whatsapp/send", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send",
+      url: "/api/whatsapp/send",
       headers: { "x-api-key": rawKey },
       payload: {
         accountId: account.id,
@@ -81,7 +81,7 @@ describe("POST /whatsapp/send", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send",
+      url: "/api/whatsapp/send",
       headers: { "x-api-key": rawKey },
       payload: {
         accountId: otherAccount.id,
@@ -100,7 +100,7 @@ describe("POST /whatsapp/send", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send",
+      url: "/api/whatsapp/send",
       headers: { "x-api-key": rawKey },
       payload: { accountId: "some-id" },
     });
@@ -111,7 +111,7 @@ describe("POST /whatsapp/send", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send",
+      url: "/api/whatsapp/send",
       payload: {
         accountId: "some-id",
         to: "123",
@@ -144,7 +144,7 @@ describe("POST /whatsapp/send-template", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send-template",
+      url: "/api/whatsapp/send-template",
       headers: { "x-api-key": rawKey },
       payload: {
         accountId: account.id,
@@ -182,7 +182,7 @@ describe("POST /whatsapp/send-template", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send-template",
+      url: "/api/whatsapp/send-template",
       headers: { "x-api-key": rawKey },
       payload: {
         accountId: otherAccount.id,
@@ -200,7 +200,7 @@ describe("POST /whatsapp/send-template", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/send-template",
+      url: "/api/whatsapp/send-template",
       headers: { "x-api-key": rawKey },
       payload: { accountId: "some-id", to: "123" },
     });

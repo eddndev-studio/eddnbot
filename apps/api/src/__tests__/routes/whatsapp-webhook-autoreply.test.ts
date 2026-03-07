@@ -107,7 +107,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -158,7 +158,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -200,7 +200,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -256,7 +256,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -310,7 +310,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -371,7 +371,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -418,7 +418,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: {
         "content-type": "application/json",
         "x-hub-signature-256": sign(payload),
@@ -474,7 +474,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
     // Send twice
     await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: { "content-type": "application/json", "x-hub-signature-256": sign(payload) },
       payload,
     });
@@ -483,7 +483,7 @@ describe("POST /whatsapp/webhook (auto-reply)", () => {
 
     await app.inject({
       method: "POST",
-      url: "/whatsapp/webhook",
+      url: "/api/whatsapp/webhook",
       headers: { "content-type": "application/json", "x-hub-signature-256": sign(payload) },
       payload,
     });

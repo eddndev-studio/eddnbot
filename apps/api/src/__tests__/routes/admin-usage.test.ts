@@ -26,7 +26,7 @@ describe("admin usage routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: "/admin/usage",
+        url: "/api/admin/usage",
         headers: adminHeaders,
       });
 
@@ -56,7 +56,7 @@ describe("admin usage routes", () => {
 
       const res = await app.inject({
         method: "GET",
-        url: `/admin/usage/${tenant.id}`,
+        url: `/api/admin/usage/${tenant.id}`,
         headers: adminHeaders,
       });
 

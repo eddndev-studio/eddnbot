@@ -63,7 +63,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -86,7 +86,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -117,7 +117,7 @@ describe("POST /ai/transcribe", () => {
 
     await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -138,7 +138,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -159,7 +159,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -176,7 +176,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers,
       payload,
     });
@@ -198,7 +198,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });
@@ -222,7 +222,7 @@ describe("POST /ai/transcribe", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/transcribe",
+      url: "/api/ai/transcribe",
       headers: { ...headers, "x-api-key": rawKey },
       payload,
     });

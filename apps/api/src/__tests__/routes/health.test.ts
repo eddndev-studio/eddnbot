@@ -11,7 +11,7 @@ describe("health routes", () => {
 
   it("GET /health returns 200 with status ok", async () => {
     const app = await appPromise;
-    const res = await app.inject({ method: "GET", url: "/health" });
+    const res = await app.inject({ method: "GET", url: "/api/health" });
 
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ status: "ok" });
@@ -19,7 +19,7 @@ describe("health routes", () => {
 
   it("GET /health/ready returns 200 with database connected", async () => {
     const app = await appPromise;
-    const res = await app.inject({ method: "GET", url: "/health/ready" });
+    const res = await app.inject({ method: "GET", url: "/api/health/ready" });
 
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({

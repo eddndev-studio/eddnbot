@@ -39,7 +39,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -65,7 +65,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -84,7 +84,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -109,7 +109,7 @@ describe("POST /ai/chat", () => {
 
     await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -138,7 +138,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -164,7 +164,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [{ role: "user", content: "Hello" }],
@@ -182,7 +182,7 @@ describe("POST /ai/chat", () => {
 
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       headers: { "x-api-key": rawKey },
       payload: {
         messages: [],
@@ -195,7 +195,7 @@ describe("POST /ai/chat", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "POST",
-      url: "/ai/chat",
+      url: "/api/ai/chat",
       payload: {
         messages: [{ role: "user", content: "Hello" }],
       },

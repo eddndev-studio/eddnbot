@@ -21,7 +21,7 @@ describe("GET /ai/models", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/ai/models",
+      url: "/api/ai/models",
       headers: { "x-api-key": rawKey },
     });
 
@@ -40,7 +40,7 @@ describe("GET /ai/models", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/ai/models?provider=anthropic",
+      url: "/api/ai/models?provider=anthropic",
       headers: { "x-api-key": rawKey },
     });
 
@@ -56,7 +56,7 @@ describe("GET /ai/models", () => {
 
     const response = await app.inject({
       method: "GET",
-      url: "/ai/models?provider=unknown",
+      url: "/api/ai/models?provider=unknown",
       headers: { "x-api-key": rawKey },
     });
 
@@ -67,7 +67,7 @@ describe("GET /ai/models", () => {
   it("returns 401 without auth", async () => {
     const response = await app.inject({
       method: "GET",
-      url: "/ai/models",
+      url: "/api/ai/models",
     });
 
     expect(response.statusCode).toBe(401);

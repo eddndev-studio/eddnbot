@@ -73,26 +73,32 @@ export async function buildApp(env: Env) {
   await app.register(rateLimitPlugin);
   await app.register(usageTrackingPlugin);
 
-  // Admin routes
-  await app.register(adminAuthRoutes);
-  await app.register(adminTenantRoutes);
-  await app.register(adminApiKeyRoutes);
-  await app.register(adminOverviewRoutes);
-  await app.register(adminUsageRoutes);
+  // All routes under /api prefix
+  await app.register(
+    async (api) => {
+      // Admin routes
+      await api.register(adminAuthRoutes);
+      await api.register(adminTenantRoutes);
+      await api.register(adminApiKeyRoutes);
+      await api.register(adminOverviewRoutes);
+      await api.register(adminUsageRoutes);
 
-  // Tenant routes
-  await app.register(healthRoutes);
-  await app.register(aiConfigRoutes);
-  await app.register(aiModelRoutes);
-  await app.register(aiChatRoutes);
-  await app.register(aiTranscribeRoutes);
-  await app.register(whatsappWebhookRoutes);
-  await app.register(whatsappAccountRoutes);
-  await app.register(whatsappSendRoutes);
-  await app.register(whatsappTemplateRoutes);
-  await app.register(conversationRoutes);
-  await app.register(tenantQuotaRoutes);
-  await app.register(usageRoutes);
+      // Tenant routes
+      await api.register(healthRoutes);
+      await api.register(aiConfigRoutes);
+      await api.register(aiModelRoutes);
+      await api.register(aiChatRoutes);
+      await api.register(aiTranscribeRoutes);
+      await api.register(whatsappWebhookRoutes);
+      await api.register(whatsappAccountRoutes);
+      await api.register(whatsappSendRoutes);
+      await api.register(whatsappTemplateRoutes);
+      await api.register(conversationRoutes);
+      await api.register(tenantQuotaRoutes);
+      await api.register(usageRoutes);
+    },
+    { prefix: "/api" },
+  );
 
   return app;
 }

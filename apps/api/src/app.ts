@@ -11,6 +11,7 @@ import { authPlugin } from "./plugins/auth";
 import { redisPlugin } from "./plugins/redis";
 import { rateLimitPlugin } from "./plugins/rate-limit";
 import { usageTrackingPlugin } from "./plugins/usage-tracking";
+import { sessionCleanupPlugin } from "./plugins/session-cleanup";
 import { healthRoutes } from "./routes/health";
 import { aiConfigRoutes } from "./routes/ai-configs";
 import { aiModelRoutes } from "./routes/ai-models";
@@ -87,6 +88,7 @@ export async function buildApp(env: Env) {
   await app.register(authPlugin);
   await app.register(rateLimitPlugin);
   await app.register(usageTrackingPlugin);
+  await app.register(sessionCleanupPlugin);
 
   // All routes under /api prefix
   await app.register(

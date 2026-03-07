@@ -13,6 +13,12 @@ const envSchema = z.object({
   WHATSAPP_VERIFY_TOKEN: z.string().optional(),
   WHATSAPP_API_VERSION: z.string().default("v21.0"),
   ADMIN_SECRET: z.string().min(32),
+  // Email (SES)
+  SES_REGION: z.string().optional(),
+  SES_ACCESS_KEY_ID: z.string().optional(),
+  SES_SECRET_ACCESS_KEY: z.string().optional(),
+  SES_FROM_ADDRESS: z.string().email().optional(),
+  APP_BASE_URL: z.string().url().optional(),
   // Storage
   STORAGE_DRIVER: z.enum(["filesystem", "r2"]).default("filesystem"),
   MEDIA_STORAGE_PATH: z.string().default("/data/media"),

@@ -34,12 +34,14 @@ import { authRoutes } from "./routes/auth";
 import { appSessionRoutes } from "./routes/app/sessions";
 import { appChatRoutes } from "./routes/app/chat";
 import { createFilesystemStorage, createR2Storage, type StorageAdapter } from "./services/storage";
+import { createEmailClient, type EmailAdapter } from "@eddnbot/email";
 
 declare module "fastify" {
   interface FastifyInstance {
     db: Database;
     env: Env;
     storage: StorageAdapter;
+    email: EmailAdapter | null;
     pendingAutoReplies: Promise<void>[];
   }
 }
@@ -66,6 +68,16 @@ export async function buildApp(env: Env) {
         })
       : createFilesystemStorage(env.MEDIA_STORAGE_PATH);
   app.decorate("storage", storage);
+  const email =
+    env.SES_REGION && env.SES_ACCESS_KEY_ID && env.SES_SECRET_ACCESS_KEY && env.SES_FROM_ADDRESS
+      ? createEmailClient({
+          region: env.SES_REGION,
+          accessKeyId: env.SES_ACCESS_KEY_ID,
+          secretAccessKey: env.SES_SECRET_ACCESS_KEY,
+          fromAddress: env.SES_FROM_ADDRESS,
+        })
+      : null;
+  app.decorate("email", email);
   app.decorate("pendingAutoReplies", [] as Promise<void>[]);
 
   // Error handler

@@ -15,6 +15,7 @@ import {
   generateRefreshToken,
   generateVerifyToken,
 } from "../lib/auth-token-utils";
+import { verifyEmailTemplate, resetPasswordTemplate } from "@eddnbot/email";
 
 const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -86,7 +87,12 @@ export async function authRoutes(app: FastifyInstance) {
           emailVerifyExpiresAt: verifyExpiresAt,
         });
 
-        // TODO: send verification email via packages/email with verifyToken
+        if (app.email && app.env.APP_BASE_URL) {
+          const template = verifyEmailTemplate(verifyToken, {
+            baseUrl: app.env.APP_BASE_URL,
+          });
+          await app.email.send({ to: body.email.toLowerCase(), ...template });
+        }
 
         return reply.code(201).send({
           id: account.id,
@@ -312,7 +318,15 @@ export async function authRoutes(app: FastifyInstance) {
         })
         .where(eq(accountCredentials.id, creds.id));
 
-      // TODO: send password reset email via packages/email with resetToken
+      if (app.email && app.env.APP_BASE_URL) {
+        const template = resetPasswordTemplate(resetToken, {
+          baseUrl: app.env.APP_BASE_URL,
+        });
+        await app.email.send({
+          to: body.email.toLowerCase(),
+          ...template,
+        });
+      }
 
       return reply.send({ message: "If the email exists, a reset link has been sent" });
     },

@@ -277,7 +277,7 @@ export async function appChatRoutes(app: FastifyInstance) {
   );
 
   // Temporary SSE test endpoint (no auth)
-  app.get(
+  app.all(
     "/app/chat/test-sse",
     { config: { skipAuth: true } },
     async (request, reply) => {

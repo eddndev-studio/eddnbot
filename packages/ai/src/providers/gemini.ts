@@ -75,14 +75,14 @@ export interface GeminiStreamClient {
         maxOutputTokens?: number;
         thinkingConfig?: { thinkingBudget?: number; thinkingLevel?: string };
       };
-    }): AsyncIterable<{
+    }): Promise<AsyncIterable<{
       text?: string;
       usageMetadata?: {
         promptTokenCount?: number;
         candidatesTokenCount?: number;
         cachedContentTokenCount?: number;
       };
-    }>;
+    }>>;
   } & GeminiClient["models"];
 }
 
@@ -113,7 +113,7 @@ export function createGeminiAdapter(client?: GeminiClient): AiProviderAdapter {
       const gemini: GeminiStreamClient = client as GeminiStreamClient ?? (new GoogleGenAI({ apiKey: config.apiKey }) as unknown as GeminiStreamClient);
 
       try {
-        const stream = gemini.models.generateContentStream(buildGeminiParams(messages, config));
+        const stream = await gemini.models.generateContentStream(buildGeminiParams(messages, config));
 
         for await (const chunk of stream) {
           if (chunk.text) {

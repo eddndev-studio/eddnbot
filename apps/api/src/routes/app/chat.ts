@@ -275,4 +275,32 @@ export async function appChatRoutes(app: FastifyInstance) {
       };
     },
   );
+
+  // Temporary SSE test endpoint (no auth)
+  app.get(
+    "/app/chat/test-sse",
+    { config: { skipAuth: true } },
+    async (request, reply) => {
+      reply.hijack();
+      reply.raw.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      });
+      reply.raw.write(":ok\n\n");
+
+      let i = 0;
+      const iv = setInterval(() => {
+        i++;
+        if (i <= 5) {
+          reply.raw.write(`event: text\ndata: ${JSON.stringify({ content: `chunk ${i} ` })}\n\n`);
+        } else {
+          clearInterval(iv);
+          reply.raw.write(`event: done\ndata: ${JSON.stringify({ messageId: "test" })}\n\n`);
+          reply.raw.end();
+        }
+      }, 500);
+    },
+  );
 }

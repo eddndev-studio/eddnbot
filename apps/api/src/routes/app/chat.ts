@@ -18,7 +18,7 @@ const API_KEY_MAP: Record<
 };
 
 const chatInputSchema = z.object({
-  content: z.string().min(1).max(32000),
+  content: z.string().trim().min(1).max(32000),
 });
 
 const messagesQuerySchema = z.object({
@@ -100,6 +100,18 @@ export async function appChatRoutes(app: FastifyInstance) {
     { config: { sessionAuth: true } },
     async (request, reply) => {
       const session = request.chatSession!;
+
+      // Ensure there's a pending user message (POST must come before GET)
+      const [lastMsg] = await app.db
+        .select({ role: chatMessages.role })
+        .from(chatMessages)
+        .where(eq(chatMessages.sessionId, session.id))
+        .orderBy(desc(chatMessages.createdAt))
+        .limit(1);
+
+      if (!lastMsg || lastMsg.role !== "user") {
+        return reply.code(400).send({ error: "No pending user message" });
+      }
 
       // Resolve AI config
       const config = await resolveAiConfig(app, session);

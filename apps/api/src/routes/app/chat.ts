@@ -148,8 +148,11 @@ export async function appChatRoutes(app: FastifyInstance) {
       let inputTokens = 0;
       let outputTokens = 0;
 
+      let chunkCount = 0;
       try {
         for await (const chunk of engine.chatStream(contextMessages, engineConfig)) {
+          chunkCount++;
+          app.log.info({ chunkType: chunk.type, chunkCount, destroyed: request.raw.destroyed }, "SSE chunk");
           if (request.raw.destroyed) break;
 
           switch (chunk.type) {
@@ -209,6 +212,7 @@ export async function appChatRoutes(app: FastifyInstance) {
         );
       }
 
+      app.log.info({ chunkCount, fullContentLength: fullContent.length, destroyed: request.raw.destroyed }, "SSE stream ended");
       reply.raw.end();
     },
   );

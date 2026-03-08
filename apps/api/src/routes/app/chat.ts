@@ -141,6 +141,8 @@ export async function appChatRoutes(app: FastifyInstance) {
         Connection: "keep-alive",
         "X-Accel-Buffering": "no",
       });
+      // Send SSE comment immediately to keep proxies (Cloudflare) from closing
+      reply.raw.write(":ok\n\n");
 
       const engine = createAiEngine({ provider });
       let fullContent = "";

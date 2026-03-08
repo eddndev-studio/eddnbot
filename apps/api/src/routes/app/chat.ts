@@ -134,6 +134,9 @@ export async function appChatRoutes(app: FastifyInstance) {
           : undefined,
       };
 
+      // Hijack response so Fastify doesn't interfere with raw streaming
+      reply.hijack();
+
       // Stream response via SSE
       reply.raw.writeHead(200, {
         "Content-Type": "text/event-stream",

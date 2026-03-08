@@ -22,7 +22,7 @@ const thinkingConfigSchema = z.discriminatedUnion("provider", [
     provider: z.literal("gemini"),
     config: z.object({
       thinkingBudget: z.number().int().min(0).max(65536).optional(),
-      thinkingLevel: z.enum(["minimal", "low", "medium", "high"]).optional(),
+      thinkingLevel: z.enum(["low", "medium", "high"]).optional(),
     }).refine((d) => d.thinkingBudget != null || d.thinkingLevel != null, {
       message: "Either thinkingBudget or thinkingLevel must be provided",
     }),

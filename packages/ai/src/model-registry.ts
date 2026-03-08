@@ -29,9 +29,9 @@ export const MODEL_REGISTRY: ModelDefinition[] = [
   { id: "o3", provider: "openai", name: "o3", capabilities: { maxOutputTokens: 100000, maxTemperature: 1, vision: true, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
   { id: "o3-mini", provider: "openai", name: "o3 Mini", capabilities: { maxOutputTokens: 65536, maxTemperature: 1, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
   { id: "o4-mini", provider: "openai", name: "o4 Mini", capabilities: { maxOutputTokens: 100000, maxTemperature: 1, vision: true, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
-  { id: "gpt-5", provider: "openai", name: "GPT-5", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
-  { id: "gpt-5-mini", provider: "openai", name: "GPT-5 Mini", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
-  { id: "gpt-5-nano", provider: "openai", name: "GPT-5 Nano", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
+  { id: "gpt-5", provider: "openai", name: "GPT-5", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
+  { id: "gpt-5-mini", provider: "openai", name: "GPT-5 Mini", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
+  { id: "gpt-5-nano", provider: "openai", name: "GPT-5 Nano", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["low", "medium", "high"], default: "medium" } } },
   { id: "gpt-5.2", provider: "openai", name: "GPT-5.2", capabilities: { maxOutputTokens: 128000, maxTemperature: 2, vision: true, thinking: { type: "effort", options: ["none", "low", "medium", "high", "xhigh"], default: "medium" } } },
 
   // Anthropic (all vision-capable)
@@ -45,10 +45,10 @@ export const MODEL_REGISTRY: ModelDefinition[] = [
   { id: "gemini-2.5-pro", provider: "gemini", name: "Gemini 2.5 Pro", capabilities: { maxOutputTokens: 65536, maxTemperature: 2, vision: true, thinking: { type: "thinking_budget", min: 0, max: 65536, default: 8192 } } },
   { id: "gemini-2.0-flash", provider: "gemini", name: "Gemini 2.0 Flash", capabilities: { maxOutputTokens: 8192, maxTemperature: 2, vision: true } },
   // Gemini — 3.x
-  { id: "gemini-3-flash-preview", provider: "gemini", name: "Gemini 3 Flash", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
-  { id: "gemini-3.1-pro-preview", provider: "gemini", name: "Gemini 3.1 Pro", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
-  { id: "gemini-3.1-flash-lite-preview", provider: "gemini", name: "Gemini 3.1 Flash Lite", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
-  { id: "gemini-3.1-pro-preview-customtools", provider: "gemini", name: "Gemini 3.1 Pro Custom Tools", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["minimal", "low", "medium", "high"], default: "medium" } } },
+  { id: "gemini-3-flash-preview", provider: "gemini", name: "Gemini 3 Flash", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["low", "medium", "high"], default: "medium" } } },
+  { id: "gemini-3.1-pro-preview", provider: "gemini", name: "Gemini 3.1 Pro", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["low", "medium", "high"], default: "medium" } } },
+  { id: "gemini-3.1-flash-lite-preview", provider: "gemini", name: "Gemini 3.1 Flash Lite", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["low", "medium", "high"], default: "medium" } } },
+  { id: "gemini-3.1-pro-preview-customtools", provider: "gemini", name: "Gemini 3.1 Pro Custom Tools", capabilities: { maxOutputTokens: 64000, maxTemperature: 2, vision: true, thinking: { type: "thinking_level", options: ["low", "medium", "high"], default: "medium" } } },
 ];
 
 export function getModelsByProvider(provider: AiProvider): ModelDefinition[] {

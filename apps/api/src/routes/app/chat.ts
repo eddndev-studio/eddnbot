@@ -72,13 +72,34 @@ async function loadSessionContext(
 }
 
 export async function appChatRoutes(app: FastifyInstance) {
-  // Send message + stream AI response via SSE
+  // POST: Store user message and return messageId
   app.post(
     "/app/chat",
     { config: { sessionAuth: true } },
     async (request, reply) => {
       const session = request.chatSession!;
       const body = chatInputSchema.parse(request.body);
+
+      // Store user message
+      const [userMsg] = await app.db
+        .insert(chatMessages)
+        .values({
+          sessionId: session.id,
+          role: "user",
+          content: body.content,
+        })
+        .returning({ id: chatMessages.id });
+
+      return reply.code(201).send({ messageId: userMsg.id });
+    },
+  );
+
+  // GET: Stream AI response via SSE (Cloudflare-compatible)
+  app.get(
+    "/app/chat/stream",
+    { config: { sessionAuth: true } },
+    async (request, reply) => {
+      const session = request.chatSession!;
 
       // Resolve AI config
       const config = await resolveAiConfig(app, session);
@@ -106,13 +127,6 @@ export async function appChatRoutes(app: FastifyInstance) {
           error: `Monthly ai_tokens quota exceeded (${quotaCheck.current}/${quotaCheck.limit})`,
         });
       }
-
-      // Store user message
-      await app.db.insert(chatMessages).values({
-        sessionId: session.id,
-        role: "user",
-        content: body.content,
-      });
 
       // Load context
       const contextMessages = await loadSessionContext(
@@ -144,7 +158,7 @@ export async function appChatRoutes(app: FastifyInstance) {
         Connection: "keep-alive",
         "X-Accel-Buffering": "no",
       });
-      // Send keepalive comments to prevent proxies (Cloudflare) from closing
+      // Send keepalive comments to prevent proxies from closing
       reply.raw.write(":ok\n\n");
       const keepalive = setInterval(() => {
         if (!request.raw.destroyed) reply.raw.write(":\n\n");
@@ -273,34 +287,6 @@ export async function appChatRoutes(app: FastifyInstance) {
         })),
         nextCursor: hasMore ? rows[0]?.id : undefined,
       };
-    },
-  );
-
-  // Temporary SSE test endpoint (no auth)
-  app.all(
-    "/app/chat/test-sse",
-    { config: { skipAuth: true } },
-    async (request, reply) => {
-      reply.hijack();
-      reply.raw.writeHead(200, {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Accel-Buffering": "no",
-      });
-      reply.raw.write(":ok\n\n");
-
-      let i = 0;
-      const iv = setInterval(() => {
-        i++;
-        if (i <= 5) {
-          reply.raw.write(`event: text\ndata: ${JSON.stringify({ content: `chunk ${i} ` })}\n\n`);
-        } else {
-          clearInterval(iv);
-          reply.raw.write(`event: done\ndata: ${JSON.stringify({ messageId: "test" })}\n\n`);
-          reply.raw.end();
-        }
-      }, 500);
     },
   );
 }

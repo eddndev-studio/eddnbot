@@ -141,8 +141,11 @@ export async function appChatRoutes(app: FastifyInstance) {
         Connection: "keep-alive",
         "X-Accel-Buffering": "no",
       });
-      // Send SSE comment immediately to keep proxies (Cloudflare) from closing
+      // Send keepalive comments to prevent proxies (Cloudflare) from closing
       reply.raw.write(":ok\n\n");
+      const keepalive = setInterval(() => {
+        if (!request.raw.destroyed) reply.raw.write(":\n\n");
+      }, 1000);
 
       const engine = createAiEngine({ provider });
       let fullContent = "";
@@ -150,11 +153,8 @@ export async function appChatRoutes(app: FastifyInstance) {
       let inputTokens = 0;
       let outputTokens = 0;
 
-      let chunkCount = 0;
       try {
         for await (const chunk of engine.chatStream(contextMessages, engineConfig)) {
-          chunkCount++;
-          app.log.info({ chunkType: chunk.type, chunkCount, destroyed: request.raw.destroyed }, "SSE chunk");
           if (request.raw.destroyed) break;
 
           switch (chunk.type) {
@@ -214,7 +214,7 @@ export async function appChatRoutes(app: FastifyInstance) {
         );
       }
 
-      app.log.info({ chunkCount, fullContentLength: fullContent.length, destroyed: request.raw.destroyed }, "SSE stream ended");
+      clearInterval(keepalive);
       reply.raw.end();
     },
   );

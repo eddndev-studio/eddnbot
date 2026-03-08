@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import rawBody from "fastify-raw-body";
@@ -92,7 +93,11 @@ export async function buildApp(env: Env) {
 
   // Plugins
   await registerSensible(app);
-  await app.register(cors);
+  await app.register(cors, {
+    origin: env.APP_BASE_URL || true,
+    credentials: true,
+  });
+  await app.register(cookie);
   await app.register(helmet);
   await app.register(multipart, { limits: { fileSize: 26 * 1024 * 1024 } });
   await app.register(rawBody, { runFirst: true });

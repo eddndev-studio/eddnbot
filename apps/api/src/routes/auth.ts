@@ -22,6 +22,34 @@ const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const RESET_TOKEN_TTL_MS = 1 * 60 * 60 * 1000; // 1 hour
 
+const COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict" as const,
+  path: "/api",
+};
+
+function setAuthCookies(
+  reply: import("fastify").FastifyReply,
+  accessToken: string,
+  refreshToken: string,
+) {
+  reply.setCookie("eddnbot_access", accessToken, {
+    ...COOKIE_OPTS,
+    maxAge: ACCESS_TOKEN_TTL_MS / 1000,
+  });
+  reply.setCookie("eddnbot_refresh", refreshToken, {
+    ...COOKIE_OPTS,
+    path: "/api/auth/refresh",
+    maxAge: REFRESH_TOKEN_TTL_MS / 1000,
+  });
+}
+
+function clearAuthCookies(reply: import("fastify").FastifyReply) {
+  reply.clearCookie("eddnbot_access", { ...COOKIE_OPTS });
+  reply.clearCookie("eddnbot_refresh", { ...COOKIE_OPTS, path: "/api/auth/refresh" });
+}
+
 const registerSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(128),
@@ -175,6 +203,8 @@ export async function authRoutes(app: FastifyInstance) {
           ),
         );
 
+      setAuthCookies(reply, access.rawToken, refresh.rawToken);
+
       return reply.send({
         accessToken: access.rawToken,
         refreshToken: refresh.rawToken,
@@ -194,8 +224,15 @@ export async function authRoutes(app: FastifyInstance) {
     "/auth/refresh",
     { config: { skipAuth: true } },
     async (request, reply) => {
-      const body = refreshSchema.parse(request.body);
-      const refreshHash = hashToken(body.refreshToken);
+      const { refreshToken: bodyToken } = refreshSchema
+        .partial()
+        .parse(request.body ?? {});
+      const rawRefresh =
+        bodyToken || (request.cookies?.eddnbot_refresh ?? null);
+      if (!rawRefresh) {
+        return reply.code(401).send({ error: "Missing refresh token" });
+      }
+      const refreshHash = hashToken(rawRefresh);
 
       const result = await app.db
         .select()
@@ -232,6 +269,8 @@ export async function authRoutes(app: FastifyInstance) {
         expiresAt,
         refreshExpiresAt,
       });
+
+      setAuthCookies(reply, access.rawToken, refresh.rawToken);
 
       return reply.send({
         accessToken: access.rawToken,
@@ -420,17 +459,18 @@ export async function authRoutes(app: FastifyInstance) {
     { config: { skipAuth: true } },
     async (request, reply) => {
       const authHeader = request.headers.authorization;
-      if (!authHeader?.startsWith("Bearer ")) {
-        return reply.code(204).send();
+      const rawToken = authHeader?.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : (request.cookies.eddnbot_access ?? null);
+
+      if (rawToken) {
+        const tokenHash = hashToken(rawToken);
+        await app.db
+          .delete(authSessions)
+          .where(eq(authSessions.tokenHash, tokenHash));
       }
 
-      const rawToken = authHeader.slice(7);
-      const tokenHash = hashToken(rawToken);
-
-      await app.db
-        .delete(authSessions)
-        .where(eq(authSessions.tokenHash, tokenHash));
-
+      clearAuthCookies(reply);
       return reply.code(204).send();
     },
   );

@@ -1,20 +1,21 @@
 const STORAGE_KEY = "eddnbot_admin_token";
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
+// Admin token in sessionStorage (cleared on tab close, not persisted across sessions)
 export function getAdminToken(): string | null {
-  return localStorage.getItem(STORAGE_KEY);
+  return sessionStorage.getItem(STORAGE_KEY);
 }
 
 export function setAdminToken(token: string) {
-  localStorage.setItem(STORAGE_KEY, token);
+  sessionStorage.setItem(STORAGE_KEY, token);
 }
 
 export function clearAdminToken() {
-  localStorage.removeItem(STORAGE_KEY);
+  sessionStorage.removeItem(STORAGE_KEY);
 }
 
 export function hasAdminToken(): boolean {
-  return !!localStorage.getItem(STORAGE_KEY);
+  return !!sessionStorage.getItem(STORAGE_KEY);
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {

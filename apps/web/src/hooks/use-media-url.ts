@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { getAccessToken, getActiveTenant } from "@/lib/api-client";
+import { getActiveTenant } from "@/lib/api-client";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -38,15 +38,12 @@ export function useMediaUrl(waMediaId: string | undefined): {
     setError(null);
 
     const headers: Record<string, string> = {};
-    const token = getAccessToken();
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-      const tenant = getActiveTenant();
-      if (tenant) headers["X-Tenant-Id"] = tenant.tenantId;
-    }
+    const tenant = getActiveTenant();
+    if (tenant) headers["X-Tenant-Id"] = tenant.tenantId;
 
     fetch(`${API_BASE}/media/${waMediaId}`, {
       headers,
+      credentials: "include",
       signal: controller.signal,
     })
       .then((res) => {

@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import fp from "fastify-plugin";
 import type { FastifyInstance } from "fastify";
 import { eq, and, isNull } from "drizzle-orm";
@@ -5,6 +6,7 @@ import { apiKeys, tenants, chatSessions, authSessions, accounts, tenantMembers }
 import { hashApiKey } from "../lib/api-key-utils";
 import { hashSessionToken } from "../lib/session-token-utils";
 import { hashToken } from "../lib/auth-token-utils";
+import { checkAdminRateLimit, recordAdminFailure } from "../services/rate-limiter";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -21,13 +23,18 @@ declare module "fastify" {
   }
 }
 
-async function resolveAccountFromBearer(
-  app: FastifyInstance,
-  authHeader: string,
-): Promise<typeof accounts.$inferSelect | null> {
-  if (!authHeader.startsWith("Bearer ")) return null;
+function extractBearerToken(
+  request: import("fastify").FastifyRequest,
+): string | null {
+  const authHeader = request.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) return authHeader.slice(7);
+  return request.cookies?.eddnbot_access ?? null;
+}
 
-  const rawToken = authHeader.slice(7);
+async function resolveAccountFromToken(
+  app: FastifyInstance,
+  rawToken: string,
+): Promise<typeof accounts.$inferSelect | null> {
   const tokenHash = hashToken(rawToken);
 
   const result = await app.db
@@ -74,8 +81,26 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
 
   app.addHook("onRequest", async (request, reply) => {
     if (request.routeOptions.config?.adminOnly) {
+      const ip = request.ip;
+
+      const rl = await checkAdminRateLimit(app.redis, ip);
+      if (!rl.allowed) {
+        const retryAfter = rl.locked
+          ? Math.max(1, rl.resetAt - Math.floor(Date.now() / 1000))
+          : Math.max(1, rl.resetAt - Math.floor(Date.now() / 1000));
+        reply.header("Retry-After", retryAfter);
+        return reply.code(429).send({ error: "Too many requests" });
+      }
+
       const token = request.headers["x-admin-token"] as string | undefined;
-      if (!token || token !== app.env.ADMIN_SECRET) {
+      const secret = app.env.ADMIN_SECRET;
+
+      if (
+        !token ||
+        token.length !== secret.length ||
+        !timingSafeEqual(Buffer.from(token), Buffer.from(secret))
+      ) {
+        await recordAdminFailure(app.redis, ip);
         return reply.code(401).send({ error: "Invalid admin token" });
       }
       return;
@@ -85,12 +110,12 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
 
     // Account auth only (no tenant context needed, e.g. /auth/me)
     if (request.routeOptions.config?.accountAuth) {
-      const authHeader = request.headers.authorization;
-      if (!authHeader) {
+      const rawToken = extractBearerToken(request);
+      if (!rawToken) {
         return reply.code(401).send({ error: "Missing access token" });
       }
 
-      const account = await resolveAccountFromBearer(app, authHeader);
+      const account = await resolveAccountFromToken(app, rawToken);
       if (!account) {
         return reply.code(401).send({ error: "Invalid or expired access token" });
       }
@@ -139,13 +164,13 @@ export const authPlugin = fp(async (app: FastifyInstance) => {
       return;
     }
 
-    // Default: API key OR Bearer + X-Tenant-Id (dual mode for tenant routes)
-    const authHeader = request.headers.authorization;
+    // Default: API key OR Bearer/cookie + X-Tenant-Id (dual mode for tenant routes)
     const tenantId = request.headers["x-tenant-id"] as string | undefined;
+    const rawToken = extractBearerToken(request);
 
-    // Try Bearer + X-Tenant-Id first
-    if (authHeader?.startsWith("Bearer ") && tenantId) {
-      const account = await resolveAccountFromBearer(app, authHeader);
+    // Try Bearer/cookie + X-Tenant-Id first
+    if (rawToken && tenantId) {
+      const account = await resolveAccountFromToken(app, rawToken);
       if (!account) {
         return reply.code(401).send({ error: "Invalid or expired access token" });
       }

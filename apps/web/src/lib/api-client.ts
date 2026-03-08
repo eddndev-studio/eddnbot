@@ -1,19 +1,9 @@
-const ACCESS_TOKEN_KEY = "eddnbot_access_token";
-const REFRESH_TOKEN_KEY = "eddnbot_refresh_token";
 const ACCOUNT_KEY = "eddnbot_account";
 const TENANT_KEY = "eddnbot_active_tenant";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "/api";
 
-// --- Token management ---
-
-export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-export function getRefreshToken(): string | null {
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
-}
+// --- Account & tenant info (non-secret, OK in localStorage) ---
 
 export interface StoredAccount {
   id: string;
@@ -42,8 +32,9 @@ export function setActiveTenant(tenant: StoredTenant) {
   localStorage.setItem(TENANT_KEY, JSON.stringify(tenant));
 }
 
+// Auth state is tracked via a non-secret flag (actual tokens are in httpOnly cookies)
 export function isAuthenticated(): boolean {
-  return !!localStorage.getItem(ACCESS_TOKEN_KEY);
+  return !!localStorage.getItem(ACCOUNT_KEY);
 }
 
 export function hasTenantSelected(): boolean {
@@ -59,14 +50,12 @@ interface LoginResponse {
 }
 
 export function saveLoginSession(data: LoginResponse) {
-  localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-  localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+  // Tokens are now in httpOnly cookies set by the server.
+  // We only store non-secret account info for UI state.
   localStorage.setItem(ACCOUNT_KEY, JSON.stringify(data.account));
 }
 
 export function clearSession() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(ACCOUNT_KEY);
   localStorage.removeItem(TENANT_KEY);
 }
@@ -91,14 +80,12 @@ export function clearApiKey() {
 let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshAccessToken(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
-
   try {
     const res = await fetch(`${API_BASE}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
+      credentials: "include",
+      body: JSON.stringify({}),
     });
 
     if (!res.ok) {
@@ -106,9 +93,6 @@ async function refreshAccessToken(): Promise<boolean> {
       return false;
     }
 
-    const data = await res.json();
-    localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
     return true;
   } catch {
     clearSession();
@@ -119,27 +103,30 @@ async function refreshAccessToken(): Promise<boolean> {
 // --- HTTP client ---
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const token = getAccessToken();
   const apiKey = getApiKey();
 
   const headers: Record<string, string> = {};
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+
+  // For legacy API key users, send the key in headers
+  if (apiKey) {
+    headers["X-API-Key"] = apiKey;
+  } else {
+    // Cookie-based auth: browser sends httpOnly cookies automatically
     const tenant = getActiveTenant();
     if (tenant) headers["X-Tenant-Id"] = tenant.tenantId;
-  } else if (apiKey) {
-    headers["X-API-Key"] = apiKey;
   }
+
   if (body) headers["Content-Type"] = "application/json";
 
   let res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
+    credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  // If 401 with Bearer token, try refresh
-  if (res.status === 401 && token) {
+  // If 401, try refresh (only for cookie-based auth)
+  if (res.status === 401 && !apiKey) {
     if (!refreshPromise) {
       refreshPromise = refreshAccessToken().finally(() => {
         refreshPromise = null;
@@ -148,10 +135,10 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     const refreshed = await refreshPromise;
 
     if (refreshed) {
-      headers["Authorization"] = `Bearer ${getAccessToken()!}`;
       res = await fetch(`${API_BASE}${path}`, {
         method,
         headers,
+        credentials: "include",
         body: body ? JSON.stringify(body) : undefined,
       });
     }

@@ -1,4 +1,4 @@
-import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents, accounts, accountCredentials, tenantMembers } from "@eddnbot/db/schema";
+import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents, accounts, accountCredentials, tenantMembers, tenantInvitations } from "@eddnbot/db/schema";
 import { generateApiKey } from "../../lib/api-key-utils";
 import { testDb } from "./test-db";
 
@@ -153,6 +153,25 @@ export async function seedTenantMember(
     })
     .returning();
   return member;
+}
+
+export async function seedInvitation(
+  tenantId: string,
+  invitedBy: string,
+  overrides: Partial<typeof tenantInvitations.$inferInsert> = {},
+) {
+  const [invitation] = await testDb
+    .insert(tenantInvitations)
+    .values({
+      tenantId,
+      email: `invited-${Date.now()}@test.com`,
+      tokenHash: `hash-${Date.now()}`,
+      invitedBy,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      ...overrides,
+    })
+    .returning();
+  return invitation;
 }
 
 export async function seedUsageEvent(

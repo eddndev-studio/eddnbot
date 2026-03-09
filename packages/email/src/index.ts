@@ -1,5 +1,5 @@
 export { createEmailClient } from "./client";
-export { verifyEmailTemplate, resetPasswordTemplate } from "./templates";
+export { verifyEmailTemplate, resetPasswordTemplate, invitationTemplate } from "./templates";
 export type { TemplateContext } from "./templates";
 export type {
   EmailClientConfig,

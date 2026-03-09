@@ -18,12 +18,15 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DataDeletionRouteImport } from './routes/data-deletion'
+import { Route as CreateTenantRouteImport } from './routes/create-tenant'
+import { Route as AcceptInvitationRouteImport } from './routes/accept-invitation'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminAdminRouteImport } from './routes/admin/_admin'
 import { Route as AuthUsageRouteImport } from './routes/_auth/usage'
 import { Route as AuthQuotasRouteImport } from './routes/_auth/quotas'
+import { Route as AuthMembersRouteImport } from './routes/_auth/members'
 import { Route as AdminAdminIndexRouteImport } from './routes/admin/_admin/index'
 import { Route as AuthWhatsappAccountsIndexRouteImport } from './routes/_auth/whatsapp-accounts/index'
 import { Route as AuthConversationsIndexRouteImport } from './routes/_auth/conversations/index'
@@ -86,6 +89,16 @@ const DataDeletionRoute = DataDeletionRouteImport.update({
   path: '/data-deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreateTenantRoute = CreateTenantRouteImport.update({
+  id: '/create-tenant',
+  path: '/create-tenant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcceptInvitationRoute = AcceptInvitationRouteImport.update({
+  id: '/accept-invitation',
+  path: '/accept-invitation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
@@ -113,6 +126,11 @@ const AuthUsageRoute = AuthUsageRouteImport.update({
 const AuthQuotasRoute = AuthQuotasRouteImport.update({
   id: '/quotas',
   path: '/quotas',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthMembersRoute = AuthMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
   getParentRoute: () => AuthRoute,
 } as any)
 const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
@@ -205,6 +223,8 @@ const AuthWhatsappAccountsAccountIdTemplatesNewRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/create-tenant': typeof CreateTenantRoute
   '/data-deletion': typeof DataDeletionRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -214,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/select-tenant': typeof SelectTenantRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/members': typeof AuthMembersRoute
   '/quotas': typeof AuthQuotasRoute
   '/usage': typeof AuthUsageRoute
   '/admin': typeof AdminAdminRouteWithChildren
@@ -236,6 +257,8 @@ export interface FileRoutesByFullPath {
   '/whatsapp-accounts/$accountId/templates/': typeof AuthWhatsappAccountsAccountIdTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/create-tenant': typeof CreateTenantRoute
   '/data-deletion': typeof DataDeletionRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -245,6 +268,7 @@ export interface FileRoutesByTo {
   '/select-tenant': typeof SelectTenantRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/members': typeof AuthMembersRoute
   '/quotas': typeof AuthQuotasRoute
   '/usage': typeof AuthUsageRoute
   '/admin/login': typeof AdminLoginRoute
@@ -268,6 +292,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
+  '/accept-invitation': typeof AcceptInvitationRoute
+  '/create-tenant': typeof CreateTenantRoute
   '/data-deletion': typeof DataDeletionRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
@@ -277,6 +303,7 @@ export interface FileRoutesById {
   '/select-tenant': typeof SelectTenantRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/_auth/members': typeof AuthMembersRoute
   '/_auth/quotas': typeof AuthQuotasRoute
   '/_auth/usage': typeof AuthUsageRoute
   '/admin/_admin': typeof AdminAdminRouteWithChildren
@@ -303,6 +330,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/accept-invitation'
+    | '/create-tenant'
     | '/data-deletion'
     | '/forgot-password'
     | '/login'
@@ -312,6 +341,7 @@ export interface FileRouteTypes {
     | '/select-tenant'
     | '/terms'
     | '/verify-email'
+    | '/members'
     | '/quotas'
     | '/usage'
     | '/admin'
@@ -334,6 +364,8 @@ export interface FileRouteTypes {
     | '/whatsapp-accounts/$accountId/templates/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/accept-invitation'
+    | '/create-tenant'
     | '/data-deletion'
     | '/forgot-password'
     | '/login'
@@ -343,6 +375,7 @@ export interface FileRouteTypes {
     | '/select-tenant'
     | '/terms'
     | '/verify-email'
+    | '/members'
     | '/quotas'
     | '/usage'
     | '/admin/login'
@@ -365,6 +398,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_auth'
+    | '/accept-invitation'
+    | '/create-tenant'
     | '/data-deletion'
     | '/forgot-password'
     | '/login'
@@ -374,6 +409,7 @@ export interface FileRouteTypes {
     | '/select-tenant'
     | '/terms'
     | '/verify-email'
+    | '/_auth/members'
     | '/_auth/quotas'
     | '/_auth/usage'
     | '/admin/_admin'
@@ -399,6 +435,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
+  AcceptInvitationRoute: typeof AcceptInvitationRoute
+  CreateTenantRoute: typeof CreateTenantRoute
   DataDeletionRoute: typeof DataDeletionRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
@@ -477,6 +515,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataDeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/create-tenant': {
+      id: '/create-tenant'
+      path: '/create-tenant'
+      fullPath: '/create-tenant'
+      preLoaderRoute: typeof CreateTenantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accept-invitation': {
+      id: '/accept-invitation'
+      path: '/accept-invitation'
+      fullPath: '/accept-invitation'
+      preLoaderRoute: typeof AcceptInvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_auth': {
       id: '/_auth'
       path: ''
@@ -517,6 +569,13 @@ declare module '@tanstack/react-router' {
       path: '/quotas'
       fullPath: '/quotas'
       preLoaderRoute: typeof AuthQuotasRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/members': {
+      id: '/_auth/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof AuthMembersRouteImport
       parentRoute: typeof AuthRoute
     }
     '/admin/_admin/': {
@@ -656,6 +715,7 @@ const AuthWhatsappAccountsAccountIdRouteWithChildren =
   )
 
 interface AuthRouteChildren {
+  AuthMembersRoute: typeof AuthMembersRoute
   AuthQuotasRoute: typeof AuthQuotasRoute
   AuthUsageRoute: typeof AuthUsageRoute
   AuthIndexRoute: typeof AuthIndexRoute
@@ -670,6 +730,7 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthMembersRoute: AuthMembersRoute,
   AuthQuotasRoute: AuthQuotasRoute,
   AuthUsageRoute: AuthUsageRoute,
   AuthIndexRoute: AuthIndexRoute,
@@ -708,6 +769,8 @@ const AdminAdminRouteWithChildren = AdminAdminRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
+  AcceptInvitationRoute: AcceptInvitationRoute,
+  CreateTenantRoute: CreateTenantRoute,
   DataDeletionRoute: DataDeletionRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,

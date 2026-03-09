@@ -13,3 +13,4 @@ export { tenantQuotas } from "./tenant-quotas";
 export { media } from "./media";
 export { chatSessions } from "./chat-sessions";
 export { chatMessages } from "./chat-messages";
+export { tenantInvitations } from "./tenant-invitations";

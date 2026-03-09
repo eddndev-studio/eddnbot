@@ -33,6 +33,8 @@ import { adminUsageRoutes } from "./routes/admin/usage";
 import { mediaRoutes } from "./routes/media";
 import { authRoutes } from "./routes/auth";
 import { tenantSelfRoutes } from "./routes/tenant-self";
+import { tenantMemberRoutes } from "./routes/tenant-members";
+import { tenantInvitationRoutes } from "./routes/tenant-invitations";
 import { appSessionRoutes } from "./routes/app/sessions";
 import { appChatRoutes } from "./routes/app/chat";
 import { createFilesystemStorage, createR2Storage, type StorageAdapter } from "./services/storage";
@@ -120,6 +122,8 @@ export async function buildApp(env: Env) {
       // Auth routes
       await api.register(authRoutes);
       await api.register(tenantSelfRoutes);
+      await api.register(tenantMemberRoutes);
+      await api.register(tenantInvitationRoutes);
 
       // Tenant routes
       await api.register(healthRoutes);

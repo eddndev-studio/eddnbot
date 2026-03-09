@@ -6,6 +6,7 @@ import {
   MessagesSquare,
   BarChart3,
   ArrowLeftRight,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getActiveTenant, getAccount, isAuthenticated } from "@/lib/api-client";
@@ -16,6 +17,7 @@ const items = [
   { to: "/whatsapp-accounts", label: "WhatsApp", icon: MessageCircle },
   { to: "/conversations", label: "Conversations", icon: MessagesSquare },
   { to: "/usage", label: "Usage", icon: BarChart3 },
+  { to: "/members", label: "Members", icon: Users },
 ] as const;
 
 export function SidebarNav() {

@@ -13,6 +13,7 @@ const titles: Record<string, string> = {
   "/whatsapp-accounts/new": "New Account",
   "/quotas": "Quotas",
   "/usage": "Usage",
+  "/members": "Members",
 };
 
 export function Header() {

@@ -1,4 +1,4 @@
-import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents, accounts, accountCredentials, tenantMembers, tenantInvitations } from "@eddnbot/db/schema";
+import { tenants, apiKeys, aiConfigs, whatsappAccounts, conversations, messages, tenantQuotas, usageEvents, accounts, accountCredentials, tenantMembers, tenantInvitations, whatsappAccountAssignments } from "@eddnbot/db/schema";
 import { generateApiKey } from "../../lib/api-key-utils";
 import { testDb } from "./test-db";
 
@@ -172,6 +172,22 @@ export async function seedInvitation(
     })
     .returning();
   return invitation;
+}
+
+export async function seedWaAssignment(
+  whatsappAccountId: string,
+  memberId: string,
+  overrides: Partial<typeof whatsappAccountAssignments.$inferInsert> = {},
+) {
+  const [assignment] = await testDb
+    .insert(whatsappAccountAssignments)
+    .values({
+      whatsappAccountId,
+      memberId,
+      ...overrides,
+    })
+    .returning();
+  return assignment;
 }
 
 export async function seedUsageEvent(

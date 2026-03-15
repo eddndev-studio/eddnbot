@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { eq, and, sql, desc, asc, ilike, or, gte, lte } from "drizzle-orm";
+import { eq, and, sql, desc, asc, ilike, or, gte, lte, inArray } from "drizzle-orm";
 import { conversations, messages, whatsappAccounts } from "@eddnbot/db/schema";
+import { resolveMemberWaFilter } from "../lib/role-utils";
 
 const listQuerySchema = z.object({
   accountId: z.string().uuid().optional(),
@@ -23,6 +24,17 @@ export async function conversationRoutes(app: FastifyInstance) {
   app.get("/conversations/stats", async (request) => {
     const tenantId = request.tenant.id;
 
+    const assignedIds = await resolveMemberWaFilter(app, request.account, tenantId);
+    // Member with no assignments → zeros
+    if (assignedIds !== null && assignedIds.length === 0) {
+      return { total: 0, active: 0, unread: 0 };
+    }
+
+    const conditions = [eq(whatsappAccounts.tenantId, tenantId)];
+    if (assignedIds !== null) {
+      conditions.push(inArray(conversations.whatsappAccountId, assignedIds));
+    }
+
     const [result] = await app.db
       .select({
         total: sql<number>`COUNT(*)`,
@@ -36,7 +48,7 @@ export async function conversationRoutes(app: FastifyInstance) {
       })
       .from(conversations)
       .innerJoin(whatsappAccounts, eq(conversations.whatsappAccountId, whatsappAccounts.id))
-      .where(eq(whatsappAccounts.tenantId, tenantId));
+      .where(and(...conditions));
 
     return {
       total: Number(result?.total ?? 0),
@@ -50,7 +62,19 @@ export async function conversationRoutes(app: FastifyInstance) {
     const tenantId = request.tenant.id;
     const query = listQuerySchema.parse(request.query);
 
+    const assignedIds = await resolveMemberWaFilter(app, request.account, tenantId);
+    // Member with no assignments → empty result
+    if (assignedIds !== null && assignedIds.length === 0) {
+      return {
+        data: [],
+        pagination: { page: query.page, limit: query.limit, total: 0, totalPages: 0 },
+      };
+    }
+
     const conditions = [eq(whatsappAccounts.tenantId, tenantId)];
+    if (assignedIds !== null) {
+      conditions.push(inArray(conversations.whatsappAccountId, assignedIds));
+    }
 
     if (query.accountId) {
       conditions.push(eq(conversations.whatsappAccountId, query.accountId));
@@ -199,6 +223,12 @@ export async function conversationRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: "Conversation not found" });
     }
 
+    // Member WA assignment check
+    const assignedIds = await resolveMemberWaFilter(app, request.account, tenantId);
+    if (assignedIds !== null && !assignedIds.includes(row.whatsappAccountId)) {
+      return reply.code(404).send({ error: "Conversation not found" });
+    }
+
     return {
       id: row.id,
       whatsappAccountId: row.whatsappAccountId,
@@ -224,12 +254,18 @@ export async function conversationRoutes(app: FastifyInstance) {
 
     // Verify conversation belongs to tenant
     const [conv] = await app.db
-      .select({ id: conversations.id })
+      .select({ id: conversations.id, whatsappAccountId: conversations.whatsappAccountId })
       .from(conversations)
       .innerJoin(whatsappAccounts, eq(conversations.whatsappAccountId, whatsappAccounts.id))
       .where(and(eq(conversations.id, id), eq(whatsappAccounts.tenantId, tenantId)));
 
     if (!conv) {
+      return reply.code(404).send({ error: "Conversation not found" });
+    }
+
+    // Member WA assignment check
+    const assignedIds = await resolveMemberWaFilter(app, request.account, tenantId);
+    if (assignedIds !== null && !assignedIds.includes(conv.whatsappAccountId)) {
       return reply.code(404).send({ error: "Conversation not found" });
     }
 

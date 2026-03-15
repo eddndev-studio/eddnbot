@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { whatsappAccounts } from "@eddnbot/db/schema";
 import { createTemplateClient, WhatsAppApiError } from "@eddnbot/whatsapp";
+import { resolveMemberWaFilter } from "../lib/role-utils";
 
 const createSchema = z.object({
   name: z.string().regex(/^[a-z0-9_]+$/, "Only lowercase letters, numbers and underscores"),
@@ -51,6 +52,12 @@ export async function whatsappTemplateRoutes(app: FastifyInstance) {
     const account = await resolveAccount(app, request, reply);
     if (!account) return;
 
+    // Member can only access assigned accounts
+    const assignedIds = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (assignedIds !== null && !assignedIds.includes(account.id)) {
+      return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
     const { name, status, category } = request.query as {
       name?: string;
       status?: string;
@@ -79,6 +86,12 @@ export async function whatsappTemplateRoutes(app: FastifyInstance) {
 
   // POST /whatsapp/accounts/:accountId/templates
   app.post("/whatsapp/accounts/:accountId/templates", async (request, reply) => {
+    // Members cannot create templates
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage WhatsApp templates" });
+    }
+
     const account = await resolveAccount(app, request, reply);
     if (!account) return;
 
@@ -102,6 +115,12 @@ export async function whatsappTemplateRoutes(app: FastifyInstance) {
 
   // DELETE /whatsapp/accounts/:accountId/templates/:templateName
   app.delete("/whatsapp/accounts/:accountId/templates/:templateName", async (request, reply) => {
+    // Members cannot delete templates
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage WhatsApp templates" });
+    }
+
     const account = await resolveAccount(app, request, reply);
     if (!account) return;
 

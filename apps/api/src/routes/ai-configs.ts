@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { aiConfigs } from "@eddnbot/db/schema";
+import { resolveMemberWaFilter } from "../lib/role-utils";
 
 const providerEnum = z.enum(["openai", "anthropic", "gemini"]);
 
@@ -52,6 +53,12 @@ const updateAiConfigSchema = z.object({
 export async function aiConfigRoutes(app: FastifyInstance) {
   // POST /ai/configs
   app.post("/ai/configs", async (request, reply) => {
+    // Members cannot create AI configs
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage AI configurations" });
+    }
+
     const body = createAiConfigSchema.parse(request.body);
 
     if (body.thinkingConfig && body.thinkingConfig.provider !== body.provider) {
@@ -115,6 +122,12 @@ export async function aiConfigRoutes(app: FastifyInstance) {
 
   // PATCH /ai/configs/:configId
   app.patch("/ai/configs/:configId", async (request, reply) => {
+    // Members cannot update AI configs
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage AI configurations" });
+    }
+
     const { configId } = request.params as { configId: string };
     const body = updateAiConfigSchema.parse(request.body);
 
@@ -141,6 +154,12 @@ export async function aiConfigRoutes(app: FastifyInstance) {
 
   // DELETE /ai/configs/:configId
   app.delete("/ai/configs/:configId", async (request, reply) => {
+    // Members cannot delete AI configs
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage AI configurations" });
+    }
+
     const { configId } = request.params as { configId: string };
 
     const [deleted] = await app.db

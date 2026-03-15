@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { whatsappAccounts, aiConfigs } from "@eddnbot/db/schema";
+import { resolveMemberWaFilter } from "../lib/role-utils";
 
 const createSchema = z.object({
   phoneNumberId: z.string().min(1).max(50),
@@ -25,6 +26,12 @@ const updateSchema = z.object({
 export async function whatsappAccountRoutes(app: FastifyInstance) {
   // POST /whatsapp/accounts
   app.post("/whatsapp/accounts", async (request, reply) => {
+    // Members cannot create WA accounts
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage WhatsApp accounts" });
+    }
+
     const body = createSchema.parse(request.body);
 
     // Validate aiConfigId belongs to the same tenant
@@ -69,10 +76,21 @@ export async function whatsappAccountRoutes(app: FastifyInstance) {
 
   // GET /whatsapp/accounts
   app.get("/whatsapp/accounts", async (request) => {
+    const assignedIds = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    // Member with no assignments → empty array
+    if (assignedIds !== null && assignedIds.length === 0) {
+      return [];
+    }
+
+    const conditions = [eq(whatsappAccounts.tenantId, request.tenant.id)];
+    if (assignedIds !== null) {
+      conditions.push(inArray(whatsappAccounts.id, assignedIds));
+    }
+
     return app.db
       .select()
       .from(whatsappAccounts)
-      .where(eq(whatsappAccounts.tenantId, request.tenant.id));
+      .where(and(...conditions));
   });
 
   // GET /whatsapp/accounts/:accountId
@@ -90,11 +108,23 @@ export async function whatsappAccountRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: "WhatsApp account not found" });
     }
 
+    // Member can only access assigned accounts
+    const assignedIds = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (assignedIds !== null && !assignedIds.includes(accountId)) {
+      return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
     return account;
   });
 
   // PATCH /whatsapp/accounts/:accountId
   app.patch("/whatsapp/accounts/:accountId", async (request, reply) => {
+    // Members cannot update WA accounts
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage WhatsApp accounts" });
+    }
+
     const { accountId } = request.params as { accountId: string };
     const body = updateSchema.parse(request.body);
 
@@ -134,6 +164,12 @@ export async function whatsappAccountRoutes(app: FastifyInstance) {
 
   // DELETE /whatsapp/accounts/:accountId
   app.delete("/whatsapp/accounts/:accountId", async (request, reply) => {
+    // Members cannot delete WA accounts
+    const memberFilter = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (memberFilter !== null) {
+      return reply.code(403).send({ error: "Members cannot manage WhatsApp accounts" });
+    }
+
     const { accountId } = request.params as { accountId: string };
 
     const [deleted] = await app.db

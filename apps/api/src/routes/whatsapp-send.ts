@@ -5,6 +5,7 @@ import { whatsappAccounts, conversations, messages } from "@eddnbot/db/schema";
 import { createWhatsAppClient } from "@eddnbot/whatsapp";
 import type { OutboundMessage, TemplateMessage } from "@eddnbot/whatsapp";
 import { checkQuota, trackWhatsAppMessage } from "../services/usage-tracker";
+import { resolveMemberWaFilter } from "../lib/role-utils";
 
 const sendSchema = z.object({
   accountId: z.string().uuid(),
@@ -47,6 +48,12 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
       );
 
     if (!account) {
+      return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
+    // Member WA assignment check
+    const assignedIds = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (assignedIds !== null && !assignedIds.includes(body.accountId)) {
       return reply.code(404).send({ error: "WhatsApp account not found" });
     }
 
@@ -128,6 +135,12 @@ export async function whatsappSendRoutes(app: FastifyInstance) {
       );
 
     if (!account) {
+      return reply.code(404).send({ error: "WhatsApp account not found" });
+    }
+
+    // Member WA assignment check
+    const assignedIds = await resolveMemberWaFilter(app, request.account, request.tenant.id);
+    if (assignedIds !== null && !assignedIds.includes(body.accountId)) {
       return reply.code(404).send({ error: "WhatsApp account not found" });
     }
 

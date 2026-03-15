@@ -2,24 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { tenantMembers, accounts } from "@eddnbot/db/schema";
-
-async function getCallerRole(
-  app: FastifyInstance,
-  accountId: string,
-  tenantId: string,
-): Promise<string | null> {
-  const [row] = await app.db
-    .select({ role: tenantMembers.role })
-    .from(tenantMembers)
-    .where(
-      and(
-        eq(tenantMembers.accountId, accountId),
-        eq(tenantMembers.tenantId, tenantId),
-      ),
-    )
-    .limit(1);
-  return row?.role ?? null;
-}
+import { getCallerRole } from "../lib/role-utils";
 
 const updateRoleSchema = z.object({
   role: z.enum(["admin", "member"]),

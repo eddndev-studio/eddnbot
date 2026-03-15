@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { tenantInvitations, tenantMembers, tenants, accounts } from "@eddnbot/db/schema";
 import { hashToken, generateVerifyToken } from "../lib/auth-token-utils";
 import { invitationTemplate } from "@eddnbot/email";
+import { getCallerRole } from "../lib/role-utils";
 
 const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -15,24 +16,6 @@ const inviteSchema = z.object({
 const acceptSchema = z.object({
   token: z.string(),
 });
-
-async function getCallerRole(
-  app: FastifyInstance,
-  accountId: string,
-  tenantId: string,
-): Promise<string | null> {
-  const [row] = await app.db
-    .select({ role: tenantMembers.role })
-    .from(tenantMembers)
-    .where(
-      and(
-        eq(tenantMembers.accountId, accountId),
-        eq(tenantMembers.tenantId, tenantId),
-      ),
-    )
-    .limit(1);
-  return row?.role ?? null;
-}
 
 export async function tenantInvitationRoutes(app: FastifyInstance) {
   // POST /tenants/invitations — Invite a user by email

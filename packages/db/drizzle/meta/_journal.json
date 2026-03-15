@@ -71,6 +71,13 @@
       "when": 1773017665620,
       "tag": "0009_secret_retro_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1773597214042,
+      "tag": "0010_overrated_otto_octavius",
+      "breakpoints": true
     }
   ]
 }

@@ -14,3 +14,4 @@ export { media } from "./media";
 export { chatSessions } from "./chat-sessions";
 export { chatMessages } from "./chat-messages";
 export { tenantInvitations } from "./tenant-invitations";
+export { whatsappAccountAssignments } from "./whatsapp-account-assignments";
